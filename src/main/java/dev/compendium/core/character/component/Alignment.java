@@ -21,7 +21,7 @@ public class Alignment {
             ElementUtils.abbreviate(name));
     }
 
-    public Alignment(@BsonId UUID uuid, @BsonProperty("sourceUuid") UUID sourceUUID, @BsonProperty("name") String name,
+    public Alignment(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID, @BsonProperty("name") String name,
         @BsonProperty("abbreviation") String abbreviation) {
         this.uuid = uuid;
         this.sourceUUID = sourceUUID;

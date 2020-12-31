@@ -22,7 +22,7 @@ public class Feat {
     }
 
     @BsonCreator
-    public Feat(@BsonId UUID uuid, @BsonProperty("sourceUuid") UUID sourceUUID, @BsonProperty("name") String name,
+    public Feat(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID, @BsonProperty("name") String name,
         @BsonProperty("description") String description, @BsonProperty("metadata") Document metadata) {
         this.uuid = uuid;
         this.sourceUUID = sourceUUID;

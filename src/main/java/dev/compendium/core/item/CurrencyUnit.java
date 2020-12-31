@@ -20,7 +20,7 @@ public class CurrencyUnit {
         this(ElementRegistry.getInstance().createCurrencyUUID(), sourceUUID, name, ElementUtils.abbreviate(name), 1);
     }
 
-    public CurrencyUnit(@BsonId UUID uuid, @BsonProperty("sourceUuid") UUID sourceUUID,
+    public CurrencyUnit(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID,
         @BsonProperty("name") String name, String abbreviation, float goldPieceEquivalent) {
         this.uuid = uuid;
         this.sourceUUID = sourceUUID;

@@ -35,7 +35,7 @@ public class MagicSchool {
      * @param name       The name of the magic school.
      */
     @BsonCreator
-    public MagicSchool(@BsonId UUID uuid, @BsonProperty("sourceUuid") UUID sourceUUID,
+    public MagicSchool(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID,
         @BsonProperty("name") String name) {
         this.uuid = uuid;
         this.sourceUUID = sourceUUID;

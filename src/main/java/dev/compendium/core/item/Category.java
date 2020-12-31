@@ -41,7 +41,7 @@ public class Category {
      * @param subcategories The list of child categories for this parent category.
      */
     @BsonCreator
-    public Category(@BsonId UUID uuid, @BsonProperty("sourceUuid") UUID sourceUUID, @BsonProperty("name") String name,
+    public Category(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID, @BsonProperty("name") String name,
         @BsonProperty("subcategories") List<UUID> subcategories) {
         this.uuid = uuid;
         this.sourceUUID = sourceUUID;

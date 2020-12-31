@@ -8,28 +8,32 @@ import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
-public class Proficiency {
+public class ClassFeature {
 
     @BsonId
     private final UUID uuid;
     private final UUID sourceUUID;
-    private final Document metadata;
     private String name;
+    private String description;
+    private int levelRequirement;
+    private final Document metadata;
 
-    public Proficiency(UUID sourceUUID, String name) {
-        this(ElementRegistry.getInstance().createProficiencyUUID(), sourceUUID, name, new Document());
+    public ClassFeature(UUID sourceUUID, String name) {
+        this(ElementRegistry.getInstance().createClassFeatureUUID(), sourceUUID, name, "", 0, new Document());
     }
 
     @BsonCreator
-    public Proficiency(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID,
-        @BsonProperty("name") String name, @BsonProperty("metadata") Document metadata) {
+    public ClassFeature(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID,
+        @BsonProperty("name") String name, @BsonProperty("description") String description,
+        @BsonProperty("level_requirement") int levelRequirement, @BsonProperty("metadata") Document metadata) {
         this.uuid = uuid;
         this.sourceUUID = sourceUUID;
         this.name = name;
+        this.description = description;
+        this.levelRequirement = levelRequirement;
         this.metadata = metadata;
     }
 
-    @BsonId
     public UUID getUUID() {
         return this.uuid;
     }
@@ -48,6 +52,22 @@ public class Proficiency {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getLevelRequirement() {
+        return this.levelRequirement;
+    }
+
+    public void setLevelRequirement(int levelRequirement) {
+        this.levelRequirement = levelRequirement;
     }
 
     public Document getMetadata() {

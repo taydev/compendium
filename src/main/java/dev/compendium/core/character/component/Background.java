@@ -12,6 +12,7 @@ import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
+// TODO: write documentation
 public class Background {
 
     @BsonId
@@ -30,7 +31,7 @@ public class Background {
     }
 
     @BsonCreator
-    public Background(@BsonId UUID uuid, @BsonProperty("sourceUuid") UUID sourceUUID, @BsonProperty("name") String name,
+    public Background(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID, @BsonProperty("name") String name,
         @BsonProperty("description") String description, @BsonProperty("proficiencies") List<UUID> proficiencyUUIDs,
         @BsonProperty("languages") List<UUID> languageUUIDs,
         @BsonProperty("equipment") Map<UUID, Integer> equipmentUUIDs,

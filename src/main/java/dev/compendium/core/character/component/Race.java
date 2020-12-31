@@ -3,6 +3,7 @@ package dev.compendium.core.character.component;
 import dev.compendium.core.ElementRegistry;
 import dev.compendium.core.util.Source;
 import java.util.UUID;
+import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
@@ -19,7 +20,7 @@ public class Race {
     }
 
     @BsonCreator
-    public Race(@BsonId UUID uuid, @BsonProperty("sourceUuid") UUID sourceUUID, @BsonProperty("name") String name) {
+    public Race(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID, @BsonProperty("name") String name) {
         this.uuid = uuid;
         this.sourceUUID = sourceUUID;
         this.name = name;

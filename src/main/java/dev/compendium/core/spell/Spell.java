@@ -46,15 +46,15 @@ public class Spell {
     }
 
     @BsonCreator
-    public Spell(@BsonId UUID uuid, @BsonProperty("sourceUuid") UUID sourceUUID, @BsonProperty("name") String name,
-        @BsonProperty("level") int level, @BsonProperty("schoolUuid") UUID schoolUUID,
-        @BsonProperty("ritual") boolean ritual, @BsonProperty("additionalTags") List<String> additionalTags,
-        @BsonProperty("castingDuration") int castingDuration, @BsonProperty("castingTimeUnit") TimeUnit timeUnit,
-        @BsonProperty("castingRange") int castingRange, @BsonProperty("castingRangeUnit") RangeUnit rangeUnit,
-        @BsonProperty("duration") int duration, @BsonProperty("durationUnit") TimeUnit durationUnit,
-        @BsonProperty("concentration") boolean concentration, @BsonProperty("verbalComponent") boolean verbalComponent,
-        @BsonProperty("somaticComponent") boolean somaticComponent,
-        @BsonProperty("materialComponent") boolean materialComponent, @BsonProperty("materials") String materials,
+    public Spell(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID, @BsonProperty("name") String name,
+        @BsonProperty("level") int level, @BsonProperty("school_uuid") UUID schoolUUID,
+        @BsonProperty("ritual") boolean ritual, @BsonProperty("additional_tags") List<String> additionalTags,
+        @BsonProperty("casting_duration") int castingDuration, @BsonProperty("casting_time_unit") TimeUnit timeUnit,
+        @BsonProperty("casting_range") int castingRange, @BsonProperty("casting_range_unit") RangeUnit rangeUnit,
+        @BsonProperty("duration") int duration, @BsonProperty("duration_unit") TimeUnit durationUnit,
+        @BsonProperty("concentration") boolean concentration, @BsonProperty("verbal_component") boolean verbalComponent,
+        @BsonProperty("somatic_component") boolean somaticComponent,
+        @BsonProperty("material_component") boolean materialComponent, @BsonProperty("materials") String materials,
         @BsonProperty("classes") List<UUID> classUUIDs, @BsonProperty("description") String description,
         @BsonProperty("metadata") Document metadata) {
         this.uuid = uuid;

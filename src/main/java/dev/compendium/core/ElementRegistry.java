@@ -8,10 +8,12 @@ import com.mongodb.client.model.TextSearchOptions;
 import dev.compendium.core.character.component.Alignment;
 import dev.compendium.core.character.component.Background;
 import dev.compendium.core.character.component.CharacterClass;
+import dev.compendium.core.character.component.ClassFeature;
 import dev.compendium.core.character.component.Feat;
 import dev.compendium.core.character.component.Language;
 import dev.compendium.core.character.component.Proficiency;
 import dev.compendium.core.character.component.Race;
+import dev.compendium.core.character.component.Subclass;
 import dev.compendium.core.item.Category;
 import dev.compendium.core.item.CurrencyUnit;
 import dev.compendium.core.item.Item;
@@ -112,6 +114,22 @@ public class ElementRegistry {
     //region Class Functions
     public CharacterClass getClassByUUID(UUID uuid) {
         return this.getClasses()
+            .find(Filters.eq("_id", uuid))
+            .first();
+    }
+    //endregion
+
+    //region Class Feature Functions
+    public ClassFeature getClassFeatureByUUID(UUID uuid) {
+        return this.getClassFeatures()
+            .find(Filters.eq("_id", uuid))
+            .first();
+    }
+    //endregion
+
+    //region Subclass Functions
+    public Subclass getSubclassByUUID(UUID uuid) {
+        return this.getSubclasses()
             .find(Filters.eq("_id", uuid))
             .first();
     }
@@ -270,52 +288,120 @@ public class ElementRegistry {
         return this.getDatabase().getCollection("alignments", Alignment.class);
     }
 
+    public void storeAlignment(Alignment alignment) {
+        this.getAlignments().findOneAndReplace(Filters.eq("_id", alignment.getUUID()), alignment);
+    }
+
     public MongoCollection<Background> getBackgrounds() {
         return this.getDatabase().getCollection("backgrounds", Background.class);
+    }
+
+    public void storeBackground(Background background) {
+        this.getBackgrounds().findOneAndReplace(Filters.eq("_id", background.getUUID()), background);
     }
 
     public MongoCollection<CharacterClass> getClasses() {
         return this.getDatabase().getCollection("classes", CharacterClass.class);
     }
 
+    public void storeClass(CharacterClass characterClass) {
+        this.getClasses().findOneAndReplace(Filters.eq("_id", characterClass.getUUID()), characterClass);
+    }
+
+    public MongoCollection<ClassFeature> getClassFeatures() {
+        return this.getDatabase().getCollection("class_features", ClassFeature.class);
+    }
+
+    public void storeClassFeature(ClassFeature classFeature) {
+        this.getClassFeatures().findOneAndReplace(Filters.eq("_id", classFeature.getUUID()), classFeature);
+    }
+
+    public MongoCollection<Subclass> getSubclasses() {
+        return this.getDatabase().getCollection("subclasses", Subclass.class);
+    }
+
+    public void storeSubclass(Subclass subclass) {
+        this.getSubclasses().findOneAndReplace(Filters.eq("_id", subclass.getUUID()), subclass);
+    }
+
     public MongoCollection<Feat> getFeats() {
         return this.getDatabase().getCollection("feats", Feat.class);
+    }
+
+    public void storeFeat(Feat feat) {
+        this.getFeats().findOneAndReplace(Filters.eq("_id", feat.getUUID()), feat);
     }
 
     public MongoCollection<Language> getLanguages() {
         return this.getDatabase().getCollection("languages", Language.class);
     }
 
+    public void storeLanguage(Language language) {
+        this.getLanguages().findOneAndReplace(Filters.eq("_id", language.getUUID()), language);
+    }
+
     public MongoCollection<Proficiency> getProficiencies() {
         return this.getDatabase().getCollection("proficiencies", Proficiency.class);
+    }
+
+    public void storeProficiency(Proficiency proficiency) {
+        this.getProficiencies().findOneAndReplace(Filters.eq("_id", proficiency.getUUID()), proficiency);
     }
 
     public MongoCollection<Race> getRaces() {
         return this.getDatabase().getCollection("races", Race.class);
     }
 
+    public void storeRace(Race race) {
+        this.getRaces().findOneAndReplace(Filters.eq("_id", race.getUUID()), race);
+    }
+
     public MongoCollection<Category> getCategories() {
         return this.getDatabase().getCollection("categories", Category.class);
+    }
+
+    public void storeCategory(Category category) {
+        this.getCategories().findOneAndReplace(Filters.eq("_id", category.getUUID()), category);
     }
 
     public MongoCollection<CurrencyUnit> getCurrencies() {
         return this.getDatabase().getCollection("currencies", CurrencyUnit.class);
     }
 
+    public void storeCurrency(CurrencyUnit currencyUnit) {
+        this.getCurrencies().findOneAndReplace(Filters.eq("_id", currencyUnit.getUUID()), currencyUnit);
+    }
+
     public MongoCollection<Item> getItems() {
         return this.getDatabase().getCollection("items", Item.class);
     }
 
+    public void storeItem(Item item) {
+        this.getItems().findOneAndReplace(Filters.eq("_id", item.getUUID()), item);
+    }
+
     public MongoCollection<MagicSchool> getMagicSchools() {
-        return this.getDatabase().getCollection("magicSchools", MagicSchool.class);
+        return this.getDatabase().getCollection("magic_schools", MagicSchool.class);
+    }
+
+    public void storeMagicSchool(MagicSchool magicSchool) {
+        this.getMagicSchools().findOneAndReplace(Filters.eq("_id", magicSchool.getUUID()), magicSchool);
     }
 
     public MongoCollection<Spell> getSpells() {
         return this.getDatabase().getCollection("spells", Spell.class);
     }
 
+    public void storeSpell(Spell spell) {
+        this.getSpells().findOneAndReplace(Filters.eq("_id", spell.getUUID()), spell);
+    }
+
     public MongoCollection<Source> getSources() {
         return this.getDatabase().getCollection("sources", Source.class);
+    }
+
+    public void storeSource(Source source) {
+        this.getSources().findOneAndReplace(Filters.eq("_id", source.getUUID()), source);
     }
     //endregion
 
@@ -344,6 +430,24 @@ public class ElementRegistry {
             return uuid;
         } else {
             return this.createClassUUID();
+        }
+    }
+
+    public UUID createClassFeatureUUID() {
+        UUID uuid = UUID.randomUUID();
+        if (this.getClassFeatureByUUID(uuid) == null) {
+            return uuid;
+        } else {
+            return this.createClassFeatureUUID();
+        }
+    }
+
+    public UUID createSubclassUUID() {
+        UUID uuid = UUID.randomUUID();
+        if (this.getSubclassByUUID(uuid) == null) {
+            return uuid;
+        } else {
+            return this.createSubclassUUID();
         }
     }
 

@@ -20,7 +20,7 @@ public class Language {
     }
 
     @BsonCreator
-    public Language(@BsonId UUID uuid, @BsonProperty("sourceUuid") UUID sourceUUID, @BsonProperty("name") String name,
+    public Language(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID, @BsonProperty("name") String name,
         @BsonProperty("description") String description) {
         this.uuid = uuid;
         this.sourceUUID = sourceUUID;

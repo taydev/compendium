@@ -49,9 +49,9 @@ public class Source {
      */
     @BsonCreator
     public Source(@BsonId UUID uuid, @BsonProperty("name") String name,
-        @BsonProperty("abbreviation") String abbreviation, @BsonProperty("authorName") String authorName,
-        @BsonProperty("authorUrl") String authorUrl, @BsonProperty("ownerID") String ownerID,
-        @BsonProperty("discordIDs") List<String> discordIDs) {
+        @BsonProperty("abbreviation") String abbreviation, @BsonProperty("author_name") String authorName,
+        @BsonProperty("author_url") String authorUrl, @BsonProperty("owner_id") String ownerID,
+        @BsonProperty("discord_ids") List<String> discordIDs) {
         this.uuid = uuid;
         this.name = name;
         this.abbreviation = abbreviation;

@@ -31,12 +31,12 @@ public class Item {
             "", false, "", new Document());
     }
 
-    public Item(@BsonId UUID uuid, @BsonProperty("sourceUuid") UUID sourceUUID, @BsonProperty("name") String name,
-        @BsonProperty("categoryUuid") UUID categoryUUID, @BsonProperty("cost") int cost,
-        @BsonProperty("currencyUnit") CurrencyUnit currencyUnit, @BsonProperty("weight") int weight,
-        @BsonProperty("additionalTags") List<String> additionalTags, @BsonProperty("description") String description,
+    public Item(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID, @BsonProperty("name") String name,
+        @BsonProperty("category_uuid") UUID categoryUUID, @BsonProperty("cost") int cost,
+        @BsonProperty("currency_unit") CurrencyUnit currencyUnit, @BsonProperty("weight") int weight,
+        @BsonProperty("additional_tags") List<String> additionalTags, @BsonProperty("description") String description,
         @BsonProperty("attunement") boolean attunement,
-        @BsonProperty("attunementRequirements") String attunementRequirements,
+        @BsonProperty("attunement_requirements") String attunementRequirements,
         @BsonProperty("metadata") Document metadata) {
         this.uuid = uuid;
         this.name = name;
