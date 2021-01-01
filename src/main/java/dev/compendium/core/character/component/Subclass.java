@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class Subclass {
@@ -42,6 +43,7 @@ public class Subclass {
         return this.sourceUUID;
     }
 
+    @BsonIgnore
     public Source getSource() {
         return ElementRegistry.getInstance().getSourceByUUID(this.getSourceUUID());
     }
@@ -66,6 +68,7 @@ public class Subclass {
         return this.subclassFeatureUUIDs;
     }
 
+    @BsonIgnore
     public List<ClassFeature> getSubclassFeatures() {
         List<ClassFeature> result = new ArrayList<>();
         for (UUID uuid : this.getSubclassFeatureUUIDs()) {

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 /**
@@ -109,6 +110,7 @@ public class Category {
      *
      * @return The list of subcategories for this parent category.
      */
+    @BsonIgnore
     public List<Category> getSubcategories() {
         List<Category> result = new ArrayList<>();
         for (UUID uuid : this.getSubcategoryUUIDs()) {

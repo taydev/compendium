@@ -1,11 +1,13 @@
 package dev.compendium.core.character.component;
 
 import dev.compendium.core.ElementRegistry;
+import dev.compendium.core.util.Metadata;
 import dev.compendium.core.util.Source;
 import java.util.UUID;
 import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class Feat {
@@ -13,17 +15,17 @@ public class Feat {
     @BsonId
     private final UUID uuid;
     private final UUID sourceUUID;
-    private final Document metadata;
+    private final Metadata metadata;
     private String name;
     private String description;
 
     public Feat(UUID sourceUUID, String name) {
-        this(ElementRegistry.getInstance().createFeatUUID(), sourceUUID, name, "", new Document());
+        this(ElementRegistry.getInstance().createFeatUUID(), sourceUUID, name, "", new Metadata());
     }
 
     @BsonCreator
     public Feat(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID, @BsonProperty("name") String name,
-        @BsonProperty("description") String description, @BsonProperty("metadata") Document metadata) {
+        @BsonProperty("description") String description, @BsonProperty("metadata") Metadata metadata) {
         this.uuid = uuid;
         this.sourceUUID = sourceUUID;
         this.name = name;
@@ -40,6 +42,7 @@ public class Feat {
         return this.sourceUUID;
     }
 
+    @BsonIgnore
     public Source getSource() {
         return ElementRegistry.getInstance().getSourceByUUID(this.getSourceUUID());
     }
@@ -60,7 +63,7 @@ public class Feat {
         this.description = description;
     }
 
-    public Document getMetadata() {
+    public Metadata getMetadata() {
         return this.metadata;
     }
 }

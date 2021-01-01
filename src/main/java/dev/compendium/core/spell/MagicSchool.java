@@ -5,6 +5,7 @@ import dev.compendium.core.util.Source;
 import java.util.UUID;
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 /**
@@ -68,6 +69,7 @@ public class MagicSchool {
      *
      * @see Source
      */
+    @BsonIgnore
     public Source getSource() {
         return ElementRegistry.getInstance().getSourceByUUID(this.getSourceUUID());
     }

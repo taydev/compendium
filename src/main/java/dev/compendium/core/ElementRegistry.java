@@ -15,7 +15,7 @@ import dev.compendium.core.character.component.Proficiency;
 import dev.compendium.core.character.component.Race;
 import dev.compendium.core.character.component.Subclass;
 import dev.compendium.core.item.Category;
-import dev.compendium.core.item.CurrencyUnit;
+import dev.compendium.core.item.Currency;
 import dev.compendium.core.item.Item;
 import dev.compendium.core.spell.MagicSchool;
 import dev.compendium.core.spell.Spell;
@@ -48,7 +48,7 @@ public class ElementRegistry {
                 .register(ClassModel.builder(Spell.class).enableDiscriminator(true).build())
                 .register(ClassModel.builder(Category.class).enableDiscriminator(true).build())
                 .register(ClassModel.builder(Item.class).enableDiscriminator(true).build())
-                .register(ClassModel.builder(CurrencyUnit.class).enableDiscriminator(true).build())
+                .register(ClassModel.builder(Currency.class).enableDiscriminator(true).build())
                 .build()));
     }
 
@@ -186,13 +186,13 @@ public class ElementRegistry {
     //endregion
 
     //region Currency Functions
-    public CurrencyUnit getCurrencyByUUID(UUID uuid) {
+    public Currency getCurrencyByUUID(UUID uuid) {
         return this.getCurrencies()
             .find(Filters.eq("_id", uuid))
             .first();
     }
 
-    public List<CurrencyUnit> findCurrencyUnitsByKeyword(String name) {
+    public List<Currency> findCurrencyUnitsByKeyword(String name) {
         return StreamSupport.stream(this.getCurrencies()
             .find(Filters.text(name, CASE_INSENSITIVE)).spliterator(), false)
             .collect(Collectors.toList());
@@ -289,7 +289,17 @@ public class ElementRegistry {
     }
 
     public void storeAlignment(Alignment alignment) {
-        this.getAlignments().findOneAndReplace(Filters.eq("_id", alignment.getUUID()), alignment);
+        if (this.getAlignmentByUUID(alignment.getUUID()) == null) {
+            this.getAlignments().insertOne(alignment);
+        } else {
+            this.getAlignments().findOneAndReplace(Filters.eq("_id", alignment.getUUID()), alignment);
+        }
+    }
+
+    public void storeAlignments(Alignment... alignments) {
+        for (Alignment alignment : alignments) {
+            this.storeAlignment(alignment);
+        }
     }
 
     public MongoCollection<Background> getBackgrounds() {
@@ -297,7 +307,17 @@ public class ElementRegistry {
     }
 
     public void storeBackground(Background background) {
-        this.getBackgrounds().findOneAndReplace(Filters.eq("_id", background.getUUID()), background);
+        if (this.getBackgroundByUUID(background.getUUID()) == null) {
+            this.getBackgrounds().insertOne(background);
+        } else {
+            this.getBackgrounds().findOneAndReplace(Filters.eq("_id", background.getUUID()), background);
+        }
+    }
+
+    public void storeBackgrounds(Background... backgrounds) {
+        for (Background background : backgrounds) {
+            this.storeBackground(background);
+        }
     }
 
     public MongoCollection<CharacterClass> getClasses() {
@@ -305,7 +325,17 @@ public class ElementRegistry {
     }
 
     public void storeClass(CharacterClass characterClass) {
-        this.getClasses().findOneAndReplace(Filters.eq("_id", characterClass.getUUID()), characterClass);
+        if (this.getClassByUUID(characterClass.getUUID()) == null) {
+            this.getClasses().insertOne(characterClass);
+        } else {
+            this.getClasses().findOneAndReplace(Filters.eq("_id", characterClass.getUUID()), characterClass);
+        }
+    }
+
+    public void storeClasses(CharacterClass... classes) {
+        for (CharacterClass characterClass : classes) {
+            this.storeClass(characterClass);
+        }
     }
 
     public MongoCollection<ClassFeature> getClassFeatures() {
@@ -313,7 +343,17 @@ public class ElementRegistry {
     }
 
     public void storeClassFeature(ClassFeature classFeature) {
-        this.getClassFeatures().findOneAndReplace(Filters.eq("_id", classFeature.getUUID()), classFeature);
+        if (this.getClassFeatureByUUID(classFeature.getUUID()) == null) {
+            this.getClassFeatures().insertOne(classFeature);
+        } else {
+            this.getClassFeatures().findOneAndReplace(Filters.eq("_id", classFeature.getUUID()), classFeature);
+        }
+    }
+
+    public void storeClassFeatures(ClassFeature... classFeatures) {
+        for (ClassFeature classFeature : classFeatures) {
+            this.storeClassFeature(classFeature);
+        }
     }
 
     public MongoCollection<Subclass> getSubclasses() {
@@ -321,7 +361,17 @@ public class ElementRegistry {
     }
 
     public void storeSubclass(Subclass subclass) {
-        this.getSubclasses().findOneAndReplace(Filters.eq("_id", subclass.getUUID()), subclass);
+        if (this.getSubclassByUUID(subclass.getUUID()) == null) {
+            this.getSubclasses().insertOne(subclass);
+        } else {
+            this.getSubclasses().findOneAndReplace(Filters.eq("_id", subclass.getUUID()), subclass);
+        }
+    }
+
+    public void storeSubclasses(Subclass... subclasses) {
+        for (Subclass subclass : subclasses) {
+            this.storeSubclass(subclass);
+        }
     }
 
     public MongoCollection<Feat> getFeats() {
@@ -329,7 +379,17 @@ public class ElementRegistry {
     }
 
     public void storeFeat(Feat feat) {
-        this.getFeats().findOneAndReplace(Filters.eq("_id", feat.getUUID()), feat);
+        if (this.getFeatByUUID(feat.getUUID()) == null) {
+            this.getFeats().insertOne(feat);
+        } else {
+            this.getFeats().findOneAndReplace(Filters.eq("_id", feat.getUUID()), feat);
+        }
+    }
+
+    public void storeFeats(Feat... feats) {
+        for (Feat feat : feats) {
+            this.storeFeat(feat);
+        }
     }
 
     public MongoCollection<Language> getLanguages() {
@@ -337,7 +397,17 @@ public class ElementRegistry {
     }
 
     public void storeLanguage(Language language) {
-        this.getLanguages().findOneAndReplace(Filters.eq("_id", language.getUUID()), language);
+        if (this.getLanguageByUUID(language.getUUID()) == null) {
+            this.getLanguages().insertOne(language);
+        } else {
+            this.getLanguages().findOneAndReplace(Filters.eq("_id", language.getUUID()), language);
+        }
+    }
+
+    public void storeLanguages(Language... languages) {
+        for (Language language : languages) {
+            this.storeLanguage(language);
+        }
     }
 
     public MongoCollection<Proficiency> getProficiencies() {
@@ -345,7 +415,17 @@ public class ElementRegistry {
     }
 
     public void storeProficiency(Proficiency proficiency) {
-        this.getProficiencies().findOneAndReplace(Filters.eq("_id", proficiency.getUUID()), proficiency);
+        if (this.getProficiencyByUUID(proficiency.getUUID()) == null) {
+            this.getProficiencies().insertOne(proficiency);
+        } else {
+            this.getProficiencies().findOneAndReplace(Filters.eq("_id", proficiency.getUUID()), proficiency);
+        }
+    }
+
+    public void storeProficiencies(Proficiency... proficiencies) {
+        for (Proficiency proficiency : proficiencies) {
+            this.storeProficiency(proficiency);
+        }
     }
 
     public MongoCollection<Race> getRaces() {
@@ -353,7 +433,17 @@ public class ElementRegistry {
     }
 
     public void storeRace(Race race) {
-        this.getRaces().findOneAndReplace(Filters.eq("_id", race.getUUID()), race);
+        if (this.getRaceByUUID(race.getUUID()) == null) {
+            this.getRaces().insertOne(race);
+        } else {
+            this.getRaces().findOneAndReplace(Filters.eq("_id", race.getUUID()), race);
+        }
+    }
+
+    public void storeRaces(Race... races) {
+        for (Race race : races) {
+            this.storeRace(race);
+        }
     }
 
     public MongoCollection<Category> getCategories() {
@@ -361,15 +451,35 @@ public class ElementRegistry {
     }
 
     public void storeCategory(Category category) {
-        this.getCategories().findOneAndReplace(Filters.eq("_id", category.getUUID()), category);
+        if (this.getCategoryByUUID(category.getUUID()) == null) {
+            this.getCategories().insertOne(category);
+        } else {
+            this.getCategories().findOneAndReplace(Filters.eq("_id", category.getUUID()), category);
+        }
     }
 
-    public MongoCollection<CurrencyUnit> getCurrencies() {
-        return this.getDatabase().getCollection("currencies", CurrencyUnit.class);
+    public void storeCategories(Category... categories) {
+        for (Category category : categories) {
+            this.storeCategory(category);
+        }
     }
 
-    public void storeCurrency(CurrencyUnit currencyUnit) {
-        this.getCurrencies().findOneAndReplace(Filters.eq("_id", currencyUnit.getUUID()), currencyUnit);
+    public MongoCollection<Currency> getCurrencies() {
+        return this.getDatabase().getCollection("currencies", Currency.class);
+    }
+
+    public void storeCurrency(Currency currency) {
+        if (this.getCurrencyByUUID(currency.getUUID()) == null) {
+            this.getCurrencies().insertOne(currency);
+        } else {
+            this.getCurrencies().findOneAndReplace(Filters.eq("_id", currency.getUUID()), currency);
+        }
+    }
+
+    public void storeCurrencies(Currency... currencies) {
+        for (Currency currency : currencies) {
+            this.storeCurrency(currency);
+        }
     }
 
     public MongoCollection<Item> getItems() {
@@ -377,7 +487,17 @@ public class ElementRegistry {
     }
 
     public void storeItem(Item item) {
-        this.getItems().findOneAndReplace(Filters.eq("_id", item.getUUID()), item);
+        if (this.getItemByUUID(item.getUUID()) == null) {
+            this.getItems().insertOne(item);
+        } else {
+            this.getItems().findOneAndReplace(Filters.eq("_id", item.getUUID()), item);
+        }
+    }
+
+    public void storeItems(Item... items) {
+        for (Item item : items) {
+            this.storeItem(item);
+        }
     }
 
     public MongoCollection<MagicSchool> getMagicSchools() {
@@ -385,7 +505,17 @@ public class ElementRegistry {
     }
 
     public void storeMagicSchool(MagicSchool magicSchool) {
-        this.getMagicSchools().findOneAndReplace(Filters.eq("_id", magicSchool.getUUID()), magicSchool);
+        if (this.getMagicSchoolByUUID(magicSchool.getUUID()) == null) {
+            this.getMagicSchools().insertOne(magicSchool);
+        } else {
+            this.getMagicSchools().findOneAndReplace(Filters.eq("_id", magicSchool.getUUID()), magicSchool);
+        }
+    }
+
+    public void storeMagicSchools(MagicSchool... magicSchools) {
+        for (MagicSchool magicSchool : magicSchools) {
+            this.storeMagicSchool(magicSchool);
+        }
     }
 
     public MongoCollection<Spell> getSpells() {
@@ -393,7 +523,17 @@ public class ElementRegistry {
     }
 
     public void storeSpell(Spell spell) {
-        this.getSpells().findOneAndReplace(Filters.eq("_id", spell.getUUID()), spell);
+        if (this.getSpellByUUID(spell.getUUID()) == null) {
+            this.getSpells().insertOne(spell);
+        } else {
+            this.getSpells().findOneAndReplace(Filters.eq("_id", spell.getUUID()), spell);
+        }
+    }
+
+    public void storeSpells(Spell... spells) {
+        for (Spell spell : spells) {
+            this.storeSpell(spell);
+        }
     }
 
     public MongoCollection<Source> getSources() {
@@ -401,7 +541,17 @@ public class ElementRegistry {
     }
 
     public void storeSource(Source source) {
-        this.getSources().findOneAndReplace(Filters.eq("_id", source.getUUID()), source);
+        if (this.getSourceByUUID(source.getUUID()) == null) {
+            this.getSources().insertOne(source);
+        } else {
+            this.getSources().findOneAndReplace(Filters.eq("_id", source.getUUID()), source);
+        }
+    }
+
+    public void storeSources(Source... sources) {
+        for (Source source : sources) {
+            this.storeSource(source);
+        }
     }
     //endregion
 

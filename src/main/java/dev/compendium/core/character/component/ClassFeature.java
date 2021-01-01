@@ -1,11 +1,13 @@
 package dev.compendium.core.character.component;
 
 import dev.compendium.core.ElementRegistry;
+import dev.compendium.core.util.Metadata;
 import dev.compendium.core.util.Source;
 import java.util.UUID;
 import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 public class ClassFeature {
@@ -16,16 +18,16 @@ public class ClassFeature {
     private String name;
     private String description;
     private int levelRequirement;
-    private final Document metadata;
+    private final Metadata metadata;
 
     public ClassFeature(UUID sourceUUID, String name) {
-        this(ElementRegistry.getInstance().createClassFeatureUUID(), sourceUUID, name, "", 0, new Document());
+        this(ElementRegistry.getInstance().createClassFeatureUUID(), sourceUUID, name, "", 0, new Metadata());
     }
 
     @BsonCreator
     public ClassFeature(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID,
         @BsonProperty("name") String name, @BsonProperty("description") String description,
-        @BsonProperty("level_requirement") int levelRequirement, @BsonProperty("metadata") Document metadata) {
+        @BsonProperty("level_requirement") int levelRequirement, @BsonProperty("metadata") Metadata metadata) {
         this.uuid = uuid;
         this.sourceUUID = sourceUUID;
         this.name = name;
@@ -42,6 +44,7 @@ public class ClassFeature {
         return this.sourceUUID;
     }
 
+    @BsonIgnore
     public Source getSource() {
         return ElementRegistry.getInstance().getSourceByUUID(this.getSourceUUID());
     }
@@ -70,7 +73,7 @@ public class ClassFeature {
         this.levelRequirement = levelRequirement;
     }
 
-    public Document getMetadata() {
+    public Metadata getMetadata() {
         return this.metadata;
     }
 }

@@ -2,6 +2,7 @@ package dev.compendium.core.spell;
 
 import dev.compendium.core.ElementRegistry;
 import dev.compendium.core.character.component.CharacterClass;
+import dev.compendium.core.util.Metadata;
 import dev.compendium.core.util.RangeUnit;
 import dev.compendium.core.util.Source;
 import dev.compendium.core.util.TimeUnit;
@@ -11,6 +12,7 @@ import java.util.UUID;
 import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 // TODO: write documentation
@@ -21,7 +23,7 @@ public class Spell {
     private final UUID sourceUUID;
     private final List<String> additionalTags;
     private final List<UUID> classUUIDs;
-    private final Document metadata;
+    private final Metadata metadata;
     private String name;
     private int level;
     private UUID schoolUUID;
@@ -42,7 +44,7 @@ public class Spell {
     public Spell(UUID sourceUUID, String name) {
         this(ElementRegistry.getInstance().createSpellUUID(), sourceUUID, name, 0, UUID.randomUUID(), false,
             new ArrayList<>(), 1, TimeUnit.ACTION, 30, RangeUnit.FOOT, 0, TimeUnit.ACTION, false, false, false, false,
-            "", new ArrayList<>(), "", new Document());
+            "", new ArrayList<>(), "", new Metadata());
     }
 
     @BsonCreator
@@ -56,7 +58,7 @@ public class Spell {
         @BsonProperty("somatic_component") boolean somaticComponent,
         @BsonProperty("material_component") boolean materialComponent, @BsonProperty("materials") String materials,
         @BsonProperty("classes") List<UUID> classUUIDs, @BsonProperty("description") String description,
-        @BsonProperty("metadata") Document metadata) {
+        @BsonProperty("metadata") Metadata metadata) {
         this.uuid = uuid;
         this.name = name;
         this.sourceUUID = sourceUUID;
@@ -89,6 +91,7 @@ public class Spell {
         return this.sourceUUID;
     }
 
+    @BsonIgnore
     public Source getSource() {
         return ElementRegistry.getInstance().getSourceByUUID(this.getSourceUUID());
     }
@@ -117,6 +120,7 @@ public class Spell {
         this.schoolUUID = schoolUUID;
     }
 
+    @BsonIgnore
     public MagicSchool getSchool() {
         return ElementRegistry.getInstance().getMagicSchoolByUUID(this.getSchoolUUID());
     }
@@ -237,6 +241,7 @@ public class Spell {
         return this.classUUIDs;
     }
 
+    @BsonIgnore
     public List<CharacterClass> getClasses() {
         List<CharacterClass> classes = new ArrayList<>();
         for (UUID uuid : this.getClassUUIDs()) {
@@ -269,7 +274,7 @@ public class Spell {
         this.description = description;
     }
 
-    public Document getMetadata() {
+    public Metadata getMetadata() {
         return this.metadata;
     }
 }

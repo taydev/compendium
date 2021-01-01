@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 // TODO: write documentation
@@ -55,6 +56,7 @@ public class Background {
         return this.sourceUUID;
     }
 
+    @BsonIgnore
     public Source getSource() {
         return ElementRegistry.getInstance().getSourceByUUID(this.getSourceUUID());
     }

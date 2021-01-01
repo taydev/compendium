@@ -1,12 +1,13 @@
 package dev.compendium.core.item;
 
 import dev.compendium.core.ElementRegistry;
+import dev.compendium.core.util.Metadata;
 import dev.compendium.core.util.Source;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 // TODO: finish
@@ -16,11 +17,11 @@ public class Item {
     private final UUID uuid;
     private final UUID sourceUUID;
     private final List<String> additionalTags;
-    private final Document metadata;
+    private final Metadata metadata;
     private String name;
     private UUID categoryUUID;
     private int cost;
-    private CurrencyUnit currencyUnit;
+    private UUID currencyUUID;
     private int weight;
     private String description;
     private boolean attunement;
@@ -28,22 +29,22 @@ public class Item {
 
     public Item(UUID sourceUUID, String name) {
         this(ElementRegistry.getInstance().createItemUUID(), sourceUUID, name, (null), 0, (null), 0, new ArrayList<>(),
-            "", false, "", new Document());
+            "", false, "", new Metadata());
     }
 
     public Item(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID, @BsonProperty("name") String name,
         @BsonProperty("category_uuid") UUID categoryUUID, @BsonProperty("cost") int cost,
-        @BsonProperty("currency_unit") CurrencyUnit currencyUnit, @BsonProperty("weight") int weight,
+        @BsonProperty("currency_unit_uuid") UUID currencyUUID, @BsonProperty("weight") int weight,
         @BsonProperty("additional_tags") List<String> additionalTags, @BsonProperty("description") String description,
         @BsonProperty("attunement") boolean attunement,
         @BsonProperty("attunement_requirements") String attunementRequirements,
-        @BsonProperty("metadata") Document metadata) {
+        @BsonProperty("metadata") Metadata metadata) {
         this.uuid = uuid;
         this.name = name;
         this.sourceUUID = sourceUUID;
         this.categoryUUID = categoryUUID;
         this.cost = cost;
-        this.currencyUnit = currencyUnit;
+        this.currencyUUID = currencyUUID;
         this.weight = weight;
         this.additionalTags = additionalTags;
         this.description = description;
@@ -61,6 +62,7 @@ public class Item {
         return this.sourceUUID;
     }
 
+    @BsonIgnore
     public Source getSource() {
         return ElementRegistry.getInstance().getSourceByUUID(this.getSourceUUID());
     }
@@ -81,6 +83,7 @@ public class Item {
         this.categoryUUID = categoryUUID;
     }
 
+    @BsonIgnore
     public Category getCategory() {
         return ElementRegistry.getInstance().getCategoryByUUID(this.getCategoryUUID());
     }
@@ -97,12 +100,21 @@ public class Item {
         this.cost = cost;
     }
 
-    public CurrencyUnit getCurrencyUnit() {
-        return this.currencyUnit;
+    public UUID getCurrencyUUID() {
+        return this.currencyUUID;
     }
 
-    public void setCurrencyUnit(CurrencyUnit currencyUnit) {
-        this.currencyUnit = currencyUnit;
+    @BsonIgnore
+    public Currency getCurrency() {
+        return ElementRegistry.getInstance().getCurrencyByUUID(this.getCurrencyUUID());
+    }
+
+    public void setCurrencyUnit(Currency currency) {
+        this.setCurrencyUUID(currency.getUUID());
+    }
+
+    public void setCurrencyUUID(UUID currencyUUID) {
+        this.currencyUUID = currencyUUID;
     }
 
     public int getWeight() {
@@ -149,7 +161,7 @@ public class Item {
         this.attunementRequirements = attunementRequirements;
     }
 
-    public Document getMetadata() {
+    public Metadata getMetadata() {
         return this.metadata;
     }
 }

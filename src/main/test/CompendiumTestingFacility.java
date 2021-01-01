@@ -1,5 +1,9 @@
-import com.mongodb.client.model.Filters;
 import dev.compendium.core.ElementRegistry;
+import dev.compendium.core.character.component.Alignment;
+import dev.compendium.core.character.component.Language;
+import dev.compendium.core.character.component.LanguageType;
+import dev.compendium.core.spell.MagicSchool;
+import dev.compendium.core.util.CharacterUtils;
 import dev.compendium.core.util.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,12 +20,64 @@ public class CompendiumTestingFacility {
         ElementRegistry.getInstance();
         LOGGER.info("Element registry initialised. Time taken: {}ms", System.currentTimeMillis() - time);
         LOGGER.info("----------------------------------------------------------------");
-        LOGGER.info("Creating testing source...");
+        LOGGER.info("Loading SRD source...");
         time = System.currentTimeMillis();
-        Source source = new Source("Compendium Testing Facility", "ults", "277385484919898112");
-        LOGGER.info("Testing source created. Storing...");
-        ElementRegistry.getInstance().storeSource(source);
+        Source source = ElementRegistry.getInstance().findSourcesByOwnerID("-1").get(0);
+        LOGGER.info("Source Name: {}", source.getName());
+        LOGGER.info("Source UUID: {}", source.getUUID());
+        LOGGER.info("Loading complete. Time taken: {}ms", System.currentTimeMillis() - time);
         LOGGER.info("----------------------------------------------------------------");
-        System.out.println("Total time taken: " + (System.currentTimeMillis() - totalTime) + "ms");
+        // ?
+        LOGGER.info("----------------------------------------------------------------");
+        LOGGER.info("Done.");
+        LOGGER.info("----------------------------------------------------------------");
+        LOGGER.info("Total time taken: {}ms", System.currentTimeMillis() - totalTime);
     }
 }
+
+/*
+        LOGGER.info("Attempting to create Barbarian in code...");
+        CharacterClass characterClass = new CharacterClass(source.getUUID(), "Barbarian");
+        characterClass.setDescription("For some, their rage springs from a communion with fierce animal spirits. "
+            + "Others draw from a roiling reservoir of anger at a world full of pain. For every barbarian, rage is a "
+            + "power that fuels not just a battle frenzy but also uncanny reflexes, resilience, and feats of strength.");
+        characterClass.setHitDice("1d12");
+
+        Proficiency lightArmourProficiency = new Proficiency(source.getUUID(), "Light Armour");
+        lightArmourProficiency.getMetadata().set("category", "armour");
+        lightArmourProficiency.getMetadata().set("type", "light");
+        characterClass.addProficiency(lightArmourProficiency);
+
+        Proficiency mediumArmourProficiency = new Proficiency(source.getUUID(), "Medium Armour");
+        mediumArmourProficiency.getMetadata().set("category", "armour");
+        mediumArmourProficiency.getMetadata().set("type", "medium");
+        characterClass.addProficiency(mediumArmourProficiency);
+
+        Proficiency shieldProficiency = new Proficiency(source.getUUID(), "Shield");
+        shieldProficiency.getMetadata().set("category", "armour");
+        shieldProficiency.getMetadata().set("type", "shield");
+        characterClass.addProficiency(shieldProficiency);
+
+        Proficiency simpleWeaponProficiency = new Proficiency(source.getUUID(), "Simple Weapons");
+        simpleWeaponProficiency.getMetadata().set("category", "weapons");
+        simpleWeaponProficiency.getMetadata().set("type", "simple");
+        characterClass.addProficiency(simpleWeaponProficiency);
+
+        Proficiency martialWeaponProficiency = new Proficiency(source.getUUID(), "Martial Weapons");
+        martialWeaponProficiency.getMetadata().set("category", "weapons");
+        martialWeaponProficiency.getMetadata().set("type", "martial");
+        characterClass.addProficiency(martialWeaponProficiency);
+
+        Proficiency strengthSavingThrowProficiency = new Proficiency(source.getUUID(), "Strength");
+        strengthSavingThrowProficiency.getMetadata().set("category", "saving_throw");
+        strengthSavingThrowProficiency.getMetadata().set("type", "strength");
+        characterClass.addProficiency(strengthSavingThrowProficiency);
+
+        Proficiency constitutionSavingThrowProficiency = new Proficiency(source.getUUID(), "Constitution");
+        constitutionSavingThrowProficiency.getMetadata().set("category", "saving_throw");
+        constitutionSavingThrowProficiency.getMetadata().set("type", "constitution");
+        characterClass.addProficiency(constitutionSavingThrowProficiency);
+
+        Choice skillChoice = new Choice(2, "animal_handling", "athletics", "intimidation", "nature", "perception", "survival");
+        characterClass.getMetadata().set("skill_choices", new Choice[]{skillChoice});
+        */

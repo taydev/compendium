@@ -5,6 +5,7 @@ import dev.compendium.core.util.ElementUtils;
 import dev.compendium.core.util.Source;
 import java.util.UUID;
 import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 // TODO: write documentation
@@ -16,8 +17,8 @@ public class Alignment {
     private String name;
     private String abbreviation;
 
-    public Alignment(Source source, String name) {
-        this(ElementRegistry.getInstance().createAlignmentUUID(), source.getUUID(), name,
+    public Alignment(UUID sourceUUID, String name) {
+        this(ElementRegistry.getInstance().createAlignmentUUID(), sourceUUID, name,
             ElementUtils.abbreviate(name));
     }
 
@@ -38,6 +39,7 @@ public class Alignment {
         return this.sourceUUID;
     }
 
+    @BsonIgnore
     public Source getSource() {
         return ElementRegistry.getInstance().getSourceByUUID(this.getSourceUUID());
     }
