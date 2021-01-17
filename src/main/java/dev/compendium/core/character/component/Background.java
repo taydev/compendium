@@ -2,6 +2,7 @@ package dev.compendium.core.character.component;
 
 import dev.compendium.core.ElementRegistry;
 import dev.compendium.core.item.Item;
+import dev.compendium.core.util.Metadata;
 import dev.compendium.core.util.Source;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,25 +19,51 @@ public class Background {
 
     @BsonId
     private final UUID uuid;
+    @BsonProperty("source_uuid")
     private final UUID sourceUUID;
+    @BsonProperty("proficiency_uuids")
     private final List<UUID> proficiencyUUIDs;
+    @BsonProperty("language_uuids")
     private final List<UUID> languageUUIDs;
+    @BsonProperty("equipment_uuids")
     private final Map<UUID, Integer> equipmentUUIDs;
-    private final Map<String, String> features;
+    @BsonProperty("feature_uuids")
+    private final List<UUID> featureUUIDs;
+    @BsonProperty("suggested_traits")
+    private final List<String> suggestedTraits;
+    @BsonProperty("suggested_ideals")
+    private final List<String> suggestedIdeals;
+    @BsonProperty("suggested_bonds")
+    private final List<String> suggestedBonds;
+    @BsonProperty("suggested_flaws")
+    private final List<String> suggestedFlaws;
+    @BsonProperty("metadata")
+    private final Metadata metadata;
     private String name;
     private String description;
 
+    public Background(Source source, String name) {
+        this(source.getUUID(), name);
+    }
+
     public Background(UUID sourceUUID, String name) {
         this(ElementRegistry.getInstance().createBackgroundUUID(), sourceUUID, name, "", new ArrayList<>(),
-            new ArrayList<>(), new HashMap<>(), new HashMap<>());
+            new ArrayList<>(), new HashMap<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+            new ArrayList<>(), new ArrayList<>(), new Metadata());
     }
 
     @BsonCreator
-    public Background(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID, @BsonProperty("name") String name,
-        @BsonProperty("description") String description, @BsonProperty("proficiencies") List<UUID> proficiencyUUIDs,
-        @BsonProperty("languages") List<UUID> languageUUIDs,
-        @BsonProperty("equipment") Map<UUID, Integer> equipmentUUIDs,
-        @BsonProperty("features") Map<String, String> features) {
+    public Background(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID,
+        @BsonProperty("name") String name,
+        @BsonProperty("description") String description, @BsonProperty("proficiency_uuids") List<UUID> proficiencyUUIDs,
+        @BsonProperty("language_uuids") List<UUID> languageUUIDs,
+        @BsonProperty("equipment_uuids") Map<UUID, Integer> equipmentUUIDs,
+        @BsonProperty("feature_uuids") List<UUID> featureUUIDs,
+        @BsonProperty("suggested_traits") List<String> suggestedTraits,
+        @BsonProperty("suggested_ideals") List<String> suggestedIdeals,
+        @BsonProperty("suggested_bonds") List<String> suggestedBonds,
+        @BsonProperty("suggested_flaws") List<String> suggestedFlaws,
+        @BsonProperty("metadata") Metadata metadata) {
         this.uuid = uuid;
         this.sourceUUID = sourceUUID;
         this.name = name;
@@ -44,7 +71,12 @@ public class Background {
         this.proficiencyUUIDs = proficiencyUUIDs;
         this.languageUUIDs = languageUUIDs;
         this.equipmentUUIDs = equipmentUUIDs;
-        this.features = features;
+        this.featureUUIDs = featureUUIDs;
+        this.suggestedTraits = suggestedTraits;
+        this.suggestedIdeals = suggestedIdeals;
+        this.suggestedBonds = suggestedBonds;
+        this.suggestedFlaws = suggestedFlaws;
+        this.metadata = metadata;
     }
 
     @BsonId
@@ -52,6 +84,7 @@ public class Background {
         return this.uuid;
     }
 
+    @BsonProperty("source_uuid")
     public UUID getSourceUUID() {
         return this.sourceUUID;
     }
@@ -77,10 +110,12 @@ public class Background {
         this.description = description;
     }
 
+    @BsonProperty("proficiency_uuids")
     public List<UUID> getProficiencyUUIDs() {
         return this.proficiencyUUIDs;
     }
 
+    @BsonIgnore
     public List<Proficiency> getProficiencies() {
         List<Proficiency> proficiencies = new ArrayList<>();
         for (UUID uuid : this.getProficiencyUUIDs()) {
@@ -90,25 +125,27 @@ public class Background {
     }
 
     public void addProficiency(Proficiency proficiency) {
-        this.getProficiencyUUIDs().add(proficiency.getUUID());
+        this.addProficiency(proficiency.getUUID());
+    }
+
+    public void addProficiency(UUID uuid) {
+        this.getProficiencyUUIDs().add(uuid);
     }
 
     public void removeProficiency(Proficiency proficiency) {
-        this.getProficiencyUUIDs().remove(proficiency.getUUID());
+        this.removeProficiency(proficiency.getUUID());
     }
 
-    public boolean hasProficiency(Proficiency proficiency) {
-        return this.hasProficiency(proficiency.getUUID());
+    public void removeProficiency(UUID uuid) {
+        this.getProficiencyUUIDs().remove(uuid);
     }
 
-    public boolean hasProficiency(UUID uuid) {
-        return this.getProficiencyUUIDs().contains(uuid);
-    }
-
+    @BsonProperty("language_uuids")
     public List<UUID> getLanguageUUIDs() {
         return this.languageUUIDs;
     }
 
+    @BsonIgnore
     public List<Language> getLanguages() {
         List<Language> languages = new ArrayList<>();
         for (UUID uuid : this.getLanguageUUIDs()) {
@@ -133,18 +170,12 @@ public class Background {
         this.getLanguageUUIDs().remove(uuid);
     }
 
-    public boolean hasLanguage(Language language) {
-        return this.hasLanguage(language.getUUID());
-    }
-
-    public boolean hasLanguage(UUID uuid) {
-        return this.getLanguageUUIDs().contains(uuid);
-    }
-
+    @BsonProperty("equipment_uuids")
     public Map<UUID, Integer> getEquipmentUUIDs() {
         return this.equipmentUUIDs;
     }
 
+    @BsonIgnore
     public Map<Item, Integer> getEquipment() {
         Map<Item, Integer> equipment = new HashMap<>();
         for (Map.Entry<UUID, Integer> entry : this.equipmentUUIDs.entrySet()) {
@@ -169,15 +200,90 @@ public class Background {
         this.getEquipmentUUIDs().remove(uuid);
     }
 
-    public Map<String, String> getFeatures() {
-        return this.features;
+    @BsonProperty("feature_uuids")
+    public List<UUID> getFeatureUUIDs() {
+        return this.featureUUIDs;
     }
 
-    public void addFeature(String featureName, String featureDescription) {
-        this.getFeatures().put(featureName, featureDescription);
+    @BsonIgnore
+    public List<Feature> getFeatures() {
+        List<Feature> result = new ArrayList<>();
+        for (UUID uuid : this.getFeatureUUIDs()) {
+            result.add(ElementRegistry.getInstance().getFeatureByUUID(uuid));
+        }
+        return result;
     }
 
-    public void removeFeature(String featureName) {
-        this.getFeatures().remove(featureName);
+    public void addFeature(Feature feature) {
+        this.addFeature(feature.getUUID());
+    }
+
+    public void addFeature(UUID uuid) {
+        this.getFeatureUUIDs().add(uuid);
+    }
+
+    public void removeFeature(Feature feature) {
+        this.removeFeature(feature.getUUID());
+    }
+
+    public void removeFeature(UUID uuid) {
+        this.getFeatureUUIDs().remove(uuid);
+    }
+
+    @BsonProperty("suggested_traits")
+    public List<String> getSuggestedTraits() {
+        return this.suggestedTraits;
+    }
+
+    public void addSuggestedTrait(String trait) {
+        this.getSuggestedTraits().add(trait);
+    }
+
+    public void removeSuggestedTrait(String trait) {
+        this.getSuggestedTraits().remove(trait);
+    }
+
+    @BsonProperty("suggested_ideals")
+    public List<String> getSuggestedIdeals() {
+        return this.suggestedIdeals;
+    }
+
+    public void addSuggestedIdeal(String ideal) {
+        this.getSuggestedIdeals().add(ideal);
+    }
+
+    public void removeSuggestedIdeal(String ideal) {
+        this.getSuggestedIdeals().remove(ideal);
+    }
+
+    @BsonProperty("suggested_bonds")
+    public List<String> getSuggestedBonds() {
+        return this.suggestedBonds;
+    }
+
+    public void addSuggestedBond(String bond) {
+        this.getSuggestedBonds().add(bond);
+    }
+
+    public void removeSuggestedBond(String bond) {
+        this.getSuggestedBonds().remove(bond);
+    }
+
+    @BsonProperty("suggested_flaws")
+    public List<String> getSuggestedFlaws() {
+        return this.suggestedFlaws;
+    }
+
+    public void addSuggestedFlaw(String flaw) {
+        this.getSuggestedFlaws().add(flaw);
+    }
+
+    public void removeSuggestedFlaw(String flaw) {
+        this.getSuggestedFlaws().remove(flaw);
+    }
+
+    @BsonProperty("metadata")
+    public Metadata getMetadata() {
+        return this.metadata;
     }
 }

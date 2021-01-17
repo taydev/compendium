@@ -19,9 +19,15 @@ public class Category {
 
     @BsonId
     private final UUID uuid;
+    @BsonProperty("source_uuid")
     private final UUID sourceUUID;
-    private final List<UUID> subcategories;
+    @BsonProperty("subcategory_uuids")
+    private final List<UUID> subcategoryUUIDs;
     private String name;
+
+    public Category(Source source, String name) {
+        this(source.getUUID(), name);
+    }
 
     /**
      * Primary constructor.
@@ -36,18 +42,18 @@ public class Category {
     /**
      * Full-args constructor, used primarily for MongoDB element initialisation.
      *
-     * @param uuid          The unique ID of the category object.
-     * @param sourceUUID    The unique ID of the source the category belongs to.
-     * @param name          The name of the source.
-     * @param subcategories The list of child categories for this parent category.
+     * @param uuid             The unique ID of the category object.
+     * @param sourceUUID       The unique ID of the source the category belongs to.
+     * @param name             The name of the source.
+     * @param subcategoryUUIDs The list of child categories for this parent category.
      */
     @BsonCreator
     public Category(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID, @BsonProperty("name") String name,
-        @BsonProperty("subcategories") List<UUID> subcategories) {
+        @BsonProperty("subcategory_uuids") List<UUID> subcategoryUUIDs) {
         this.uuid = uuid;
         this.sourceUUID = sourceUUID;
         this.name = name;
-        this.subcategories = subcategories;
+        this.subcategoryUUIDs = subcategoryUUIDs;
     }
 
     /**
@@ -65,6 +71,7 @@ public class Category {
      *
      * @return The category's source ID.
      */
+    @BsonProperty("source_uuid")
     public UUID getSourceUUID() {
         return this.sourceUUID;
     }
@@ -74,6 +81,7 @@ public class Category {
      *
      * @return The category's source.
      */
+    @BsonIgnore
     public Source getSource() {
         return ElementRegistry.getInstance().getSourceByUUID(this.getSourceUUID());
     }
@@ -97,18 +105,19 @@ public class Category {
     }
 
     /**
-     * Returns a list of the subcategories' IDs belonging to this parent category.
+     * Returns a list of the subcategoryUUIDs' IDs belonging to this parent category.
      *
-     * @return The list of subcategories' IDs associated with this category.
+     * @return The list of subcategoryUUIDs' IDs associated with this category.
      */
+    @BsonProperty("subcategory_uuids")
     public List<UUID> getSubcategoryUUIDs() {
-        return this.subcategories;
+        return this.subcategoryUUIDs;
     }
 
     /**
-     * Returns a list of subcategories associated with this category.
+     * Returns a list of subcategoryUUIDs associated with this category.
      *
-     * @return The list of subcategories for this parent category.
+     * @return The list of subcategoryUUIDs for this parent category.
      */
     @BsonIgnore
     public List<Category> getSubcategories() {
@@ -120,7 +129,7 @@ public class Category {
     }
 
     /**
-     * Adds a category to the parent category's list of subcategories.
+     * Adds a category to the parent category's list of subcategoryUUIDs.
      *
      * @param category The category to add to the parent's subcategory list.
      */

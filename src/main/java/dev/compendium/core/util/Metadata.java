@@ -22,7 +22,8 @@ public class Metadata {
         this.document = document;
     }
 
-    public void set(String key, Object value) {
+    public Metadata set(String key, Object value) {
         this.setDocument(this.getDocument().append(key, value));
+        return this;
     }
 }

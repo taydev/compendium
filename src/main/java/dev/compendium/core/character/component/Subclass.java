@@ -15,9 +15,13 @@ public class Subclass {
     @BsonId
     private final UUID uuid;
     private final UUID sourceUUID;
+    private final List<UUID> subclassFeatureUUIDs;
     private String name;
     private String description;
-    private final List<UUID> subclassFeatureUUIDs;
+
+    public Subclass(Source source, String name) {
+        this(source.getUUID(), name);
+    }
 
     public Subclass(UUID sourceUUID, String name) {
         this(ElementRegistry.getInstance().createSubclassUUID(), sourceUUID, name, "", new ArrayList<>());
@@ -69,28 +73,27 @@ public class Subclass {
     }
 
     @BsonIgnore
-    public List<ClassFeature> getSubclassFeatures() {
-        List<ClassFeature> result = new ArrayList<>();
+    public List<Feature> getSubclassFeatures() {
+        List<Feature> result = new ArrayList<>();
         for (UUID uuid : this.getSubclassFeatureUUIDs()) {
-            result.add(ElementRegistry.getInstance().getClassFeatureByUUID(uuid));
+            result.add(ElementRegistry.getInstance().getFeatureByUUID(uuid));
         }
         return result;
     }
 
-    public void addSubclassFeature(ClassFeature classFeature) {
-        this.addSubclassFeature(classFeature.getUUID());
+    public void addSubclassFeature(Feature feature) {
+        this.addSubclassFeature(feature.getUUID());
     }
 
     public void addSubclassFeature(UUID uuid) {
         this.getSubclassFeatureUUIDs().add(uuid);
     }
 
-    public void removeSubclassFeature(ClassFeature classFeature) {
-        this.removeSubclassFeature(classFeature.getUUID());
+    public void removeSubclassFeature(Feature feature) {
+        this.removeSubclassFeature(feature.getUUID());
     }
 
     public void removeSubclassFeature(UUID uuid) {
         this.getSubclassFeatureUUIDs().remove(uuid);
     }
-
 }

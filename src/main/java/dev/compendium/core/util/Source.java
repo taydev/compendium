@@ -17,11 +17,15 @@ public class Source {
 
     @BsonId
     private final UUID uuid;
+    @BsonProperty("owner_id")
     private final String ownerID;
+    @BsonProperty("discord_ids")
     private final List<String> discordIDs;
     private String name;
     private String abbreviation;
+    @BsonProperty("author_name")
     private String authorName;
+    @BsonProperty("author_url")
     private String authorUrl;
 
     /**
@@ -115,6 +119,7 @@ public class Source {
      *
      * @return The source author's name.
      */
+    @BsonProperty("author_name")
     public String getAuthorName() {
         return this.authorName;
     }
@@ -134,6 +139,7 @@ public class Source {
      *
      * @return The URL of the author of the source.
      */
+    @BsonProperty("author_url")
     public String getAuthorUrl() {
         return this.authorUrl;
     }
@@ -153,6 +159,7 @@ public class Source {
      *
      * @return The Discord ID of the source creator.
      */
+    @BsonProperty("owner_id")
     public String getOwnerID() {
         return this.ownerID;
     }
@@ -163,6 +170,7 @@ public class Source {
      *
      * @return The associated Discord IDs of the source.
      */
+    @BsonProperty("discord_ids")
     public List<String> getDiscordIDs() {
         return this.discordIDs;
     }

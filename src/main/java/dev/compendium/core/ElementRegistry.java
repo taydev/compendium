@@ -8,8 +8,8 @@ import com.mongodb.client.model.TextSearchOptions;
 import dev.compendium.core.character.component.Alignment;
 import dev.compendium.core.character.component.Background;
 import dev.compendium.core.character.component.CharacterClass;
-import dev.compendium.core.character.component.ClassFeature;
 import dev.compendium.core.character.component.Feat;
+import dev.compendium.core.character.component.Feature;
 import dev.compendium.core.character.component.Language;
 import dev.compendium.core.character.component.Proficiency;
 import dev.compendium.core.character.component.Race;
@@ -92,21 +92,21 @@ public class ElementRegistry {
             .collect(Collectors.toList());
     }
 
-    public List<Background> findBackgroundsByProficiency(UUID proficiency) {
+    public List<Background> findBackgroundsByProficiency(UUID proficiencyUUID) {
         return StreamSupport.stream(this.getBackgrounds()
-            .find(Filters.in("proficiencies", proficiency)).spliterator(), false)
+            .find(Filters.in("proficiency_uuids", proficiencyUUID)).spliterator(), false)
             .collect(Collectors.toList());
     }
 
-    public List<Background> findBackgroundsByLanguage(UUID language) {
+    public List<Background> findBackgroundsByLanguage(UUID languageUUID) {
         return StreamSupport.stream(this.getBackgrounds()
-            .find(Filters.in("languages", language)).spliterator(), false)
+            .find(Filters.in("language_uuids", languageUUID)).spliterator(), false)
             .collect(Collectors.toList());
     }
 
-    public List<Background> findBackgroundsByEquipment(UUID item) {
+    public List<Background> findBackgroundsByEquipment(UUID equipmentUUID) {
         return StreamSupport.stream(this.getBackgrounds()
-            .find(Filters.in("equipment", item)).spliterator(), false)
+            .find(Filters.in("equipment_uuids", equipmentUUID)).spliterator(), false)
             .collect(Collectors.toList());
     }
     //endregion
@@ -119,9 +119,9 @@ public class ElementRegistry {
     }
     //endregion
 
-    //region Class Feature Functions
-    public ClassFeature getClassFeatureByUUID(UUID uuid) {
-        return this.getClassFeatures()
+    //region Feature Functions
+    public Feature getFeatureByUUID(UUID uuid) {
+        return this.getFeatures()
             .find(Filters.eq("_id", uuid))
             .first();
     }
@@ -141,12 +141,6 @@ public class ElementRegistry {
             .find(Filters.eq("_id", uuid))
             .first();
     }
-
-    public List<Feat> findFeatsByKeyword(String keyword) {
-        return StreamSupport.stream(this.getFeats()
-            .find(Filters.text(keyword, CASE_INSENSITIVE)).spliterator(), false)
-            .collect(Collectors.toList());
-    }
     //endregion
 
     //region Language Functions
@@ -154,6 +148,16 @@ public class ElementRegistry {
         return this.getLanguages()
             .find(Filters.eq("_id", uuid))
             .first();
+    }
+
+    public List<Language> getAllLanguages() {
+        return StreamSupport.stream(this.getLanguages().find().spliterator(), false)
+            .collect(Collectors.toList());
+    }
+
+    public List<UUID> getAllLanguageUUIDs() {
+        return StreamSupport.stream(this.getLanguages().find().spliterator(), false)
+            .map(Language::getUUID).collect(Collectors.toList());
     }
 
     public List<Language> findLanguagesByKeyword(String keyword) {
@@ -168,6 +172,12 @@ public class ElementRegistry {
         return this.getProficiencies()
             .find(Filters.eq("_id", uuid))
             .first();
+    }
+
+    public List<Proficiency> findProficienciesByKeyword(String keyword) {
+        return StreamSupport.stream(this.getProficiencies()
+            .find(Filters.text(keyword, CASE_INSENSITIVE)).spliterator(), false)
+            .collect(Collectors.toList());
     }
     //endregion
 
@@ -192,9 +202,15 @@ public class ElementRegistry {
             .first();
     }
 
-    public List<Currency> findCurrencyUnitsByKeyword(String name) {
+    public List<Currency> findCurrenciesByAbbreviation(String abbreviation) {
         return StreamSupport.stream(this.getCurrencies()
-            .find(Filters.text(name, CASE_INSENSITIVE)).spliterator(), false)
+            .find(Filters.eq("abbreviation", abbreviation)).spliterator(), false)
+            .collect(Collectors.toList());
+    }
+
+    public List<Currency> findCurrenciesByKeyword(String keyword) {
+        return StreamSupport.stream(this.getCurrencies()
+            .find(Filters.text(keyword, CASE_INSENSITIVE)).spliterator(), false)
             .collect(Collectors.toList());
     }
     //endregion
@@ -219,6 +235,18 @@ public class ElementRegistry {
             .find(Filters.eq("_id", uuid))
             .first();
     }
+
+    public List<Item> findItemsByName(String name) {
+        return StreamSupport.stream(this.getItems()
+            .find(Filters.in("name", name)).spliterator(), false)
+            .collect(Collectors.toList());
+    }
+
+    public List<Item> findItemsByKeyword(String keyword) {
+        return StreamSupport.stream(this.getItems()
+            .find(Filters.text(keyword, CASE_INSENSITIVE)).spliterator(), false)
+            .collect(Collectors.toList());
+    }
     //endregion
 
     //region Magic School Functions
@@ -228,9 +256,9 @@ public class ElementRegistry {
             .first();
     }
 
-    public List<MagicSchool> findMagicSchoolsBySource(Source source) {
+    public List<MagicSchool> findMagicSchoolsBySource(UUID sourceUUID) {
         return StreamSupport.stream(this.getMagicSchools()
-            .find(Filters.eq("source", source)).spliterator(), false)
+            .find(Filters.eq("source_uuid", sourceUUID)).spliterator(), false)
             .collect(Collectors.toList());
     }
 
@@ -264,13 +292,13 @@ public class ElementRegistry {
 
     public List<Source> findSourcesByOwnerID(String ownerID) {
         return StreamSupport.stream(this.getSources()
-            .find(Filters.eq("ownerID", ownerID)).spliterator(), false)
+            .find(Filters.eq("owner_id", ownerID)).spliterator(), false)
             .collect(Collectors.toList());
     }
 
     public List<Source> findSourcesByMemberID(String memberID) {
         return StreamSupport.stream(this.getSources()
-            .find(Filters.in("discordIDs", memberID)).spliterator(), false)
+            .find(Filters.in("discord_ids", memberID)).spliterator(), false)
             .collect(Collectors.toList());
     }
     //endregion
@@ -338,21 +366,21 @@ public class ElementRegistry {
         }
     }
 
-    public MongoCollection<ClassFeature> getClassFeatures() {
-        return this.getDatabase().getCollection("class_features", ClassFeature.class);
+    public MongoCollection<Feature> getFeatures() {
+        return this.getDatabase().getCollection("features", Feature.class);
     }
 
-    public void storeClassFeature(ClassFeature classFeature) {
-        if (this.getClassFeatureByUUID(classFeature.getUUID()) == null) {
-            this.getClassFeatures().insertOne(classFeature);
+    public void storeFeature(Feature feature) {
+        if (this.getFeatureByUUID(feature.getUUID()) == null) {
+            this.getFeatures().insertOne(feature);
         } else {
-            this.getClassFeatures().findOneAndReplace(Filters.eq("_id", classFeature.getUUID()), classFeature);
+            this.getFeatures().findOneAndReplace(Filters.eq("_id", feature.getUUID()), feature);
         }
     }
 
-    public void storeClassFeatures(ClassFeature... classFeatures) {
-        for (ClassFeature classFeature : classFeatures) {
-            this.storeClassFeature(classFeature);
+    public void storeFeatures(Feature... features) {
+        for (Feature feature : features) {
+            this.storeFeature(feature);
         }
     }
 
@@ -583,12 +611,12 @@ public class ElementRegistry {
         }
     }
 
-    public UUID createClassFeatureUUID() {
+    public UUID createFeatureUUID() {
         UUID uuid = UUID.randomUUID();
-        if (this.getClassFeatureByUUID(uuid) == null) {
+        if (this.getFeatureByUUID(uuid) == null) {
             return uuid;
         } else {
-            return this.createClassFeatureUUID();
+            return this.createFeatureUUID();
         }
     }
 

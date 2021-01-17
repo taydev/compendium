@@ -15,8 +15,13 @@ public class MagicSchool {
 
     @BsonId
     private final UUID uuid;
+    @BsonProperty("source_uuid")
     private final UUID sourceUUID;
     private String name;
+
+    public MagicSchool(Source source, String name) {
+        this(source.getUUID(), name);
+    }
 
     /**
      * Primary constructor.
@@ -58,6 +63,7 @@ public class MagicSchool {
      *
      * @return The ID of the magic school's source.
      */
+    @BsonProperty("source_uuid")
     public UUID getSourceUUID() {
         return this.sourceUUID;
     }

@@ -7,7 +7,6 @@ import dev.compendium.core.util.Source;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
@@ -18,14 +17,18 @@ public class CharacterClass {
     @BsonId
     private final UUID uuid;
     private final UUID sourceUUID;
+    private final List<UUID> proficiencyUUIDs;
+    private final List<UUID> equipmentUUIDs;
+    private final List<UUID> featureUUIDs;
+    private final Metadata metadata;
     private String name;
     private String description;
     private String hitDice;
-    private final List<UUID> proficiencyUUIDs;
-    private final List<UUID> startingEquipmentUUIDs;
-    private final List<UUID> classFeatureUUIDs;
     private UUID subclassUUID;
-    private final Metadata metadata;
+
+    public CharacterClass(Source source, String name) {
+        this(source.getUUID(), name);
+    }
 
     public CharacterClass(UUID sourceUUID, String name) {
         this(ElementRegistry.getInstance().createClassUUID(), sourceUUID, name, "", "", new ArrayList<>(),
@@ -36,8 +39,8 @@ public class CharacterClass {
     public CharacterClass(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID,
         @BsonProperty("name") String name, @BsonProperty("description") String description,
         @BsonProperty("hit_dice") String hitDice, @BsonProperty("proficiency_uuids") List<UUID> proficiencyUUIDs,
-        @BsonProperty("starting_equipment_uuids") List<UUID> startingEquipmentUUIDs,
-        @BsonProperty("class_feature_uuids") List<UUID> classFeatureUUIDs,
+        @BsonProperty("equipment_uuids") List<UUID> equipmentUUIDs,
+        @BsonProperty("feature_uuids") List<UUID> featureUUIDs,
         @BsonProperty("subclass_uuid") UUID subclassUUID, @BsonProperty("metadata") Metadata metadata) {
         this.uuid = uuid;
         this.sourceUUID = sourceUUID;
@@ -45,8 +48,8 @@ public class CharacterClass {
         this.description = description;
         this.hitDice = hitDice;
         this.proficiencyUUIDs = proficiencyUUIDs;
-        this.startingEquipmentUUIDs = startingEquipmentUUIDs;
-        this.classFeatureUUIDs = classFeatureUUIDs;
+        this.equipmentUUIDs = equipmentUUIDs;
+        this.featureUUIDs = featureUUIDs;
         this.subclassUUID = subclassUUID;
         this.metadata = metadata;
     }
@@ -126,14 +129,14 @@ public class CharacterClass {
         return this.getProficiencyUUIDs().contains(uuid);
     }
 
-    public List<UUID> getStartingEquipmentUUIDs() {
-        return this.startingEquipmentUUIDs;
+    public List<UUID> getEquipmentUUIDs() {
+        return this.equipmentUUIDs;
     }
 
     @BsonIgnore
-    public List<Item> getStartingEquipment() {
+    public List<Item> getEquipment() {
         List<Item> result = new ArrayList<>();
-        for (UUID uuid : this.getStartingEquipmentUUIDs()) {
+        for (UUID uuid : this.getEquipmentUUIDs()) {
             result.add(ElementRegistry.getInstance().getItemByUUID(uuid));
         }
         return result;
@@ -144,7 +147,7 @@ public class CharacterClass {
     }
 
     public void addEquipment(UUID uuid) {
-        this.getStartingEquipmentUUIDs().add(uuid);
+        this.getEquipmentUUIDs().add(uuid);
     }
 
     public void removeEquipment(Item item) {
@@ -152,40 +155,44 @@ public class CharacterClass {
     }
 
     public void removeEquipment(UUID uuid) {
-        this.getStartingEquipmentUUIDs().remove(uuid);
+        this.getEquipmentUUIDs().remove(uuid);
     }
 
-    public List<UUID> getClassFeatureUUIDs() {
-        return this.classFeatureUUIDs;
+    public List<UUID> getFeatureUUIDs() {
+        return this.featureUUIDs;
     }
 
     @BsonIgnore
-    public List<ClassFeature> getClassFeatures() {
-        List<ClassFeature> result = new ArrayList<>();
-        for (UUID uuid : this.getClassFeatureUUIDs()) {
-            result.add(ElementRegistry.getInstance().getClassFeatureByUUID(uuid));
+    public List<Feature> getClassFeatures() {
+        List<Feature> result = new ArrayList<>();
+        for (UUID uuid : this.getFeatureUUIDs()) {
+            result.add(ElementRegistry.getInstance().getFeatureByUUID(uuid));
         }
         return result;
     }
 
-    public void addClassFeature(ClassFeature classFeature) {
-        this.addClassFeature(classFeature.getUUID());
+    public void addFeature(Feature feature) {
+        this.addFeature(feature.getUUID());
     }
 
-    public void addClassFeature(UUID uuid) {
-        this.getClassFeatureUUIDs().add(uuid);
+    public void addFeature(UUID uuid) {
+        this.getFeatureUUIDs().add(uuid);
     }
 
-    public void removeClassFeature(ClassFeature classFeature) {
-        this.removeClassFeature(classFeature.getUUID());
+    public void removeFeature(Feature feature) {
+        this.removeFeature(feature.getUUID());
     }
 
-    public void removeClassFeature(UUID uuid) {
-        this.getClassFeatureUUIDs().remove(uuid);
+    public void removeFeature(UUID uuid) {
+        this.getFeatureUUIDs().remove(uuid);
     }
 
     public UUID getSubclassUUID() {
         return this.subclassUUID;
+    }
+
+    public void setSubclassUUID(UUID subclassUUID) {
+        this.subclassUUID = subclassUUID;
     }
 
     @BsonIgnore
@@ -193,14 +200,9 @@ public class CharacterClass {
         return ElementRegistry.getInstance().getSubclassByUUID(this.getSubclassUUID());
     }
 
-    public void setSubclassUUID(UUID subclassUUID) {
-        this.subclassUUID = subclassUUID;
-    }
-
     public Metadata getMetadata() {
         return this.metadata;
     }
-
 }
 
 

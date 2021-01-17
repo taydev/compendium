@@ -4,7 +4,6 @@ import dev.compendium.core.ElementRegistry;
 import dev.compendium.core.util.Metadata;
 import dev.compendium.core.util.Source;
 import java.util.UUID;
-import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
@@ -18,6 +17,10 @@ public class Feat {
     private final Metadata metadata;
     private String name;
     private String description;
+
+    public Feat(Source source, String name) {
+        this(source.getUUID(), name);
+    }
 
     public Feat(UUID sourceUUID, String name) {
         this(ElementRegistry.getInstance().createFeatUUID(), sourceUUID, name, "", new Metadata());

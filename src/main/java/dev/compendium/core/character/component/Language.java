@@ -12,10 +12,16 @@ public class Language {
 
     @BsonId
     private final UUID uuid;
+    @BsonProperty("source_uuid")
     private final UUID sourceUUID;
     private String name;
     private String description;
+    @BsonProperty("language_type")
     private LanguageType languageType;
+
+    public Language(Source source, String name) {
+        this(source.getUUID(), name);
+    }
 
     public Language(UUID sourceUUID, String name) {
         this(ElementRegistry.getInstance().createLanguageUUID(), sourceUUID, name, "", LanguageType.STANDARD);
@@ -36,6 +42,7 @@ public class Language {
         return this.uuid;
     }
 
+    @BsonProperty("source_uuid")
     public UUID getSourceUUID() {
         return this.sourceUUID;
     }
@@ -61,6 +68,7 @@ public class Language {
         this.description = description;
     }
 
+    @BsonProperty("language_type")
     public LanguageType getLanguageType() {
         return this.languageType;
     }

@@ -13,9 +13,14 @@ public class Alignment {
 
     @BsonId
     private final UUID uuid;
+    @BsonProperty("source_uuid")
     private final UUID sourceUUID;
     private String name;
     private String abbreviation;
+
+    public Alignment(Source source, String name) {
+        this(source.getUUID(), name);
+    }
 
     public Alignment(UUID sourceUUID, String name) {
         this(ElementRegistry.getInstance().createAlignmentUUID(), sourceUUID, name,
@@ -35,6 +40,7 @@ public class Alignment {
         return this.uuid;
     }
 
+    @BsonProperty("source_uuid")
     public UUID getSourceUUID() {
         return this.sourceUUID;
     }

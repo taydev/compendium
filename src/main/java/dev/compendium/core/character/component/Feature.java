@@ -4,28 +4,33 @@ import dev.compendium.core.ElementRegistry;
 import dev.compendium.core.util.Metadata;
 import dev.compendium.core.util.Source;
 import java.util.UUID;
-import org.bson.Document;
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
-public class ClassFeature {
+public class Feature {
 
     @BsonId
     private final UUID uuid;
+    @BsonProperty("source_uuid")
     private final UUID sourceUUID;
+    private final Metadata metadata;
     private String name;
     private String description;
+    @BsonProperty("level_requirement")
     private int levelRequirement;
-    private final Metadata metadata;
 
-    public ClassFeature(UUID sourceUUID, String name) {
-        this(ElementRegistry.getInstance().createClassFeatureUUID(), sourceUUID, name, "", 0, new Metadata());
+    public Feature(Source source, String name) {
+        this(source.getUUID(), name);
+    }
+
+    public Feature(UUID sourceUUID, String name) {
+        this(ElementRegistry.getInstance().createFeatureUUID(), sourceUUID, name, "", 0, new Metadata());
     }
 
     @BsonCreator
-    public ClassFeature(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID,
+    public Feature(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID,
         @BsonProperty("name") String name, @BsonProperty("description") String description,
         @BsonProperty("level_requirement") int levelRequirement, @BsonProperty("metadata") Metadata metadata) {
         this.uuid = uuid;
@@ -36,10 +41,12 @@ public class ClassFeature {
         this.metadata = metadata;
     }
 
+    @BsonId
     public UUID getUUID() {
         return this.uuid;
     }
 
+    @BsonProperty("source_uuid")
     public UUID getSourceUUID() {
         return this.sourceUUID;
     }
@@ -65,6 +72,7 @@ public class ClassFeature {
         this.description = description;
     }
 
+    @BsonProperty("level_requirement")
     public int getLevelRequirement() {
         return this.levelRequirement;
     }
