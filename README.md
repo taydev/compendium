@@ -24,6 +24,6 @@ An external software (probably built into Compendium Creator) that functions as 
 
 ## End
 
-I intend for Compendium, at some point, to be a free-to-use alternative to all current D&D5e solutions. A large majority of my inspiration stems from (Avrae)[https://github.com/avrae/avrae] and (AuroraBuilder)[https://github.com/aurorabuilder], however there are a few tweaks here and there I would like to make to create the most enjoyable experience as possible. Those two projects are amazing, and even though AuroraBuilder is now discontinued I highly suggest checking both out in the meanwhile if you intend on running your own campaign or if you just need to improve your already existing Dungeons & Dragons experience.
+I intend for Compendium, at some point, to be a free-to-use alternative to all current D&D5e solutions. A large majority of my inspiration stems from [Avrae](https://github.com/avrae/avrae) and [AuroraBuilder](https://github.com/aurorabuilder), however there are a few tweaks here and there I would like to make to create the most enjoyable experience as possible. Those two projects are amazing, and even though AuroraBuilder is now discontinued I highly suggest checking both out in the meanwhile if you intend on running your own campaign or if you just need to improve your already existing Dungeons & Dragons experience.
 
 Oh, and all names of the previously mentioned projects are subject to change, of course.
