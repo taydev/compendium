@@ -4,6 +4,7 @@ import dev.compendium.core.ElementRegistry;
 import dev.compendium.core.util.ElementUtils;
 import dev.compendium.core.util.Source;
 import java.util.UUID;
+import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
@@ -15,7 +16,9 @@ public class Alignment {
     private final UUID uuid;
     @BsonProperty("source_uuid")
     private final UUID sourceUUID;
+    @BsonProperty("name")
     private String name;
+    @BsonProperty("abbreviation")
     private String abbreviation;
 
     public Alignment(Source source, String name) {
@@ -27,6 +30,7 @@ public class Alignment {
             ElementUtils.abbreviate(name));
     }
 
+    @BsonCreator
     public Alignment(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID, @BsonProperty("name") String name,
         @BsonProperty("abbreviation") String abbreviation) {
         this.uuid = uuid;
@@ -50,6 +54,7 @@ public class Alignment {
         return ElementRegistry.getInstance().getSourceByUUID(this.getSourceUUID());
     }
 
+    @BsonProperty("name")
     public String getName() {
         return this.name;
     }
@@ -58,6 +63,7 @@ public class Alignment {
         this.name = name;
     }
 
+    @BsonProperty("abbreviation")
     public String getAbbreviation() {
         return this.abbreviation;
     }

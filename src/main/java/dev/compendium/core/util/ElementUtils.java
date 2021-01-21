@@ -4,12 +4,16 @@ import dev.compendium.core.ElementRegistry;
 import dev.compendium.core.character.component.Background;
 import dev.compendium.core.character.component.Feature;
 import dev.compendium.core.character.component.Proficiency;
+import dev.compendium.core.item.Currency;
 import dev.compendium.core.item.Item;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.UUID;
+import net.dv8tion.jda.api.EmbedBuilder;
 import org.bson.Document;
 
 // TODO: write documentation
@@ -28,8 +32,8 @@ public class ElementUtils {
     }
 
     public static String convertIDtoDisplay(String id) {
-        id = id.replaceAll("_", " ");
         StringBuilder sb = new StringBuilder();
+        id = id.replaceAll("_", " ");
         for (String split : id.toLowerCase().split(" ")) {
             sb.append(split.substring(0, 1).toUpperCase()).append(split.substring(1)).append(" ");
         }
@@ -223,5 +227,82 @@ public class ElementUtils {
             sb.append("**: ").append(feature.getDescription());
         }
         return sb.toString().trim();
+    }
+
+    public static EmbedBuilder createItemSummary(Item item) {
+        EmbedBuilder result = new EmbedBuilder();
+        result.setColor(randomColourGenerator());
+        String title = item.getName();
+        if (item.getQuantity() > 1) {
+            title = title + " (" + item.getQuantity() + ")";
+        }
+        result.setTitle(title);
+        if (item.getCategoryUUID() != null) {
+            result.addField("Category", item.getCategory().getName(), true);
+        }
+        if (item.getCost() > 0) {
+            Currency currency = item.getCurrency();
+            System.out.println(currency.getAbbreviation());
+            String costString = item.getCost() + currency.getAbbreviation();
+            if (currency.getGoldPieceEquivalent() != 1) {
+                costString = costString + " (" + (item.getCost() * currency.getGoldPieceEquivalent()) + "gp)";
+            }
+            result.addField("Cost", costString, true);
+        }
+        if (item.getWeight() > 0) {
+            String weight;
+            if (item.getWeight() != 1) {
+                weight = processWeight(item.getWeight()) + " lbs.";
+            } else {
+                weight = processWeight(item.getWeight()) + " lb.";
+            }
+            result.addField("Weight", weight, true);
+        }
+        if (!item.getDescription().equals("")) {
+            String description = "";
+            if (item.getAdditionalTags().size() > 0) {
+                description = "(" + String.join(", ", item.getAdditionalTags()) + ")\n";
+            }
+            description = description + item.getDescription();
+            result.setDescription(description);
+        }
+        result.setFooter("Item Source - " + item.getSource().getAbbreviation());
+        return result;
+    }
+
+    private static Color randomColourGenerator() {
+        Random random = new Random();
+        float hue = random.nextFloat();
+        float saturation = 0.9f;
+        float luminance = 1.0f;
+        return Color.getHSBColor(hue, saturation, luminance);
+    }
+
+    private static String processWeight(double weight) {
+        int intWeight = (int) weight;
+        double decimalWeight = weight - intWeight;
+
+        if (decimalWeight == 0) {
+            return String.valueOf(intWeight);
+        } else if (decimalWeight == 0.125) {
+            return intWeight + " 1/8";
+        } else if (decimalWeight == 0.25) {
+            return intWeight + " 1/4";
+        } else if (decimalWeight == 0.33) {
+            return intWeight + " 1/3";
+        } else if (decimalWeight == 0.375) {
+            return intWeight + " 3/8";
+        } else if (decimalWeight == 0.5) {
+            return intWeight + " 1/2";
+        } else if (decimalWeight == 0.625) {
+            return intWeight + " 5/8";
+        } else if (decimalWeight == 0.66) {
+            return intWeight + " 2/3";
+        } else if (decimalWeight == 0.75) {
+            return intWeight + " 3/4";
+        } else if (decimalWeight == 0.875) {
+            return intWeight + " 7/8";
+        }
+        return "";
     }
 }

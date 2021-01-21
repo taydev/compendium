@@ -39,7 +39,9 @@ public class Background {
     private final List<String> suggestedFlaws;
     @BsonProperty("metadata")
     private final Metadata metadata;
+    @BsonProperty("name")
     private String name;
+    @BsonProperty("description")
     private String description;
 
     public Background(Source source, String name) {
@@ -94,6 +96,7 @@ public class Background {
         return ElementRegistry.getInstance().getSourceByUUID(this.getSourceUUID());
     }
 
+    @BsonProperty("name")
     public String getName() {
         return this.name;
     }
@@ -102,6 +105,7 @@ public class Background {
         this.name = name;
     }
 
+    @BsonProperty("description")
     public String getDescription() {
         return this.description;
     }

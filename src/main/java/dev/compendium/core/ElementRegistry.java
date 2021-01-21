@@ -19,18 +19,23 @@ import dev.compendium.core.item.Currency;
 import dev.compendium.core.item.Item;
 import dev.compendium.core.spell.MagicSchool;
 import dev.compendium.core.spell.Spell;
+import dev.compendium.core.util.Creator;
 import dev.compendium.core.util.Source;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.apache.commons.text.WordUtils;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ElementRegistry {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(ElementRegistry.class);
     private static ElementRegistry instance;
     private final TextSearchOptions CASE_INSENSITIVE = new TextSearchOptions().caseSensitive(false)
         .diacriticSensitive(false);
@@ -40,6 +45,7 @@ public class ElementRegistry {
 
     //region Constructors and Instance Management Functions
     public ElementRegistry() {
+        LOGGER.info("Initialising database connections...");
         this.client = new MongoClient();
         this.codecRegistry = CodecRegistries.fromRegistries(MongoClient.getDefaultCodecRegistry(),
             CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true)
@@ -49,7 +55,9 @@ public class ElementRegistry {
                 .register(ClassModel.builder(Category.class).enableDiscriminator(true).build())
                 .register(ClassModel.builder(Item.class).enableDiscriminator(true).build())
                 .register(ClassModel.builder(Currency.class).enableDiscriminator(true).build())
+                .register(ClassModel.builder(Creator.class).enableDiscriminator(true).build())
                 .build()));
+        LOGGER.info("Database connections initialised.");
     }
 
     public static ElementRegistry getInstance() {
@@ -237,12 +245,20 @@ public class ElementRegistry {
     }
 
     public List<Item> findItemsByName(String name) {
-        return StreamSupport.stream(this.getItems()
+        name = WordUtils.capitalizeFully(name);
+        LOGGER.info("Finding item with name: {}", name);
+        List<Item> nameList = StreamSupport.stream(this.getItems()
             .find(Filters.in("name", name)).spliterator(), false)
             .collect(Collectors.toList());
+        List<Item> altNameList = StreamSupport.stream(this.getItems()
+            .find(Filters.in("alternative_names", name)).spliterator(), false)
+            .collect(Collectors.toList());
+        nameList.addAll(altNameList);
+        return nameList;
     }
 
     public List<Item> findItemsByKeyword(String keyword) {
+        LOGGER.info("Finding items with keyword: {}", keyword);
         return StreamSupport.stream(this.getItems()
             .find(Filters.text(keyword, CASE_INSENSITIVE)).spliterator(), false)
             .collect(Collectors.toList());
@@ -273,6 +289,14 @@ public class ElementRegistry {
     public Spell getSpellByUUID(UUID uuid) {
         return this.getSpells()
             .find(Filters.eq("_id", uuid))
+            .first();
+    }
+    //endregion
+
+    //region Creator Functions
+    public Creator getCreatorByUUID(String id) {
+        return this.getCreators()
+            .find(Filters.eq("_id", id))
             .first();
     }
     //endregion
@@ -561,6 +585,18 @@ public class ElementRegistry {
     public void storeSpells(Spell... spells) {
         for (Spell spell : spells) {
             this.storeSpell(spell);
+        }
+    }
+
+    public MongoCollection<Creator> getCreators() {
+        return this.getDatabase().getCollection("creators", Creator.class);
+    }
+
+    public void storeCreator(Creator creator) {
+        if (this.getCreatorByUUID(creator.getDiscordId()) == null) {
+            this.getCreators().insertOne(creator);
+        } else {
+            this.getCreators().findOneAndReplace(Filters.eq("_id", creator.getDiscordId()), creator);
         }
     }
 

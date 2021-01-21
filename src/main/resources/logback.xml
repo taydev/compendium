@@ -20,5 +20,4 @@
     </root>
 
     <logger name="net.dv8tion" level="INFO"/>
-    <logger name="org.mongodb" level="INFO"/>
 </configuration>

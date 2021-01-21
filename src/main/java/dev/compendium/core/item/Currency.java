@@ -15,7 +15,9 @@ public class Currency {
     private final UUID uuid;
     @BsonProperty("source_uuid")
     private final UUID sourceUUID;
+    @BsonProperty("name")
     private String name;
+    @BsonProperty("abbreviation")
     private String abbreviation;
     @BsonProperty("gold_piece_equivalent")
     private double goldPieceEquivalent;
@@ -54,6 +56,7 @@ public class Currency {
         return ElementRegistry.getInstance().getSourceByUUID(this.getSourceUUID());
     }
 
+    @BsonProperty("name")
     public String getName() {
         return this.name;
     }
@@ -63,6 +66,7 @@ public class Currency {
         this.abbreviation = ElementUtils.abbreviate(this.getName());
     }
 
+    @BsonProperty("abbreviation")
     public String getAbbreviation() {
         return this.abbreviation;
     }
