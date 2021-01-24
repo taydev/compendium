@@ -8,6 +8,7 @@ import dev.compendium.bot.commands.ICommand;
 import dev.compendium.bot.commands.creation.SessionCommand;
 import dev.compendium.bot.commands.developer.DebugViewCommand;
 import dev.compendium.bot.commands.developer.ReloadCommand;
+import dev.compendium.bot.commands.dnd.RollCommand;
 import dev.compendium.bot.commands.elements.ItemCommand;
 import dev.compendium.bot.commands.general.PingCommand;
 import dev.compendium.bot.listeners.CommandListener;
@@ -142,11 +143,17 @@ public class CompendiumBot {
 
     public void registerCommands() {
         this.commands = new HashSet<>();
-        this.registerCommand(new PingCommand());
-        this.registerCommand(new ReloadCommand());
-        this.registerCommand(new DebugViewCommand());
-        this.registerCommand(new ItemCommand());
+        //--
         this.registerCommand(new SessionCommand());
+        //--
+        this.registerCommand(new DebugViewCommand());
+        this.registerCommand(new ReloadCommand());
+        //--
+        this.registerCommand(new RollCommand());
+        //--
+        this.registerCommand(new ItemCommand());
+        //--
+        this.registerCommand(new PingCommand());
     }
 
     public void reloadCommands() {

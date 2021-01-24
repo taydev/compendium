@@ -4,5 +4,6 @@ public enum CommandCategory {
     GENERAL,
     DEVELOPER,
     ELEMENTS,
-    CREATION
+    CREATION,
+    DND
 }

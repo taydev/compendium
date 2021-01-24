@@ -97,5 +97,12 @@
             <artifactId>commons-text</artifactId>
             <version>1.9</version>
         </dependency>
+        <!-- tysm binary ily <3 <3 <3 <3 <3 -->
+        <!-- source: https://github.com/binaryoverload/dicerollparser -->
+        <dependency>
+            <groupId>co.uk.binaryoverload</groupId>
+            <artifactId>DiceRollParser</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>
