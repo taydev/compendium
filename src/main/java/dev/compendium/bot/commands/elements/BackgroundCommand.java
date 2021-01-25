@@ -6,10 +6,9 @@ import dev.compendium.bot.CompendiumBot;
 import dev.compendium.bot.commands.CommandCategory;
 import dev.compendium.bot.commands.ICommand;
 import dev.compendium.core.ElementRegistry;
-import dev.compendium.core.item.Item;
+import dev.compendium.core.character.component.Background;
 import dev.compendium.core.util.ElementUtils;
 import java.awt.Color;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,29 +19,33 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.internal.utils.tuple.Pair;
 
 @SuppressWarnings("Duplicates")
-public class ItemCommand extends ListenerAdapter implements ICommand {
+public class BackgroundCommand implements ICommand {
 
-    private final Map<String, Pair<Message, List<Item>>> pendingChoices = new HashMap<>();
+    private final Map<String, Pair<Message, List<Background>>> pendingChoices = new HashMap<>();
 
     private final EventWaiter waiter;
 
-    public ItemCommand() {
+    public BackgroundCommand() {
         this.waiter = new EventWaiter();
         CompendiumBot.getInstance().getClient().addEventListener(this.waiter);
     }
 
     @Override
     public String getCommand() {
-        return "item";
+        return "background";
+    }
+
+    @Override
+    public String[] getAliases() {
+        return new String[]{"bg"};
     }
 
     @Override
     public String getDescription() {
-        return "Shows the listing of an item based on the entered query.";
+        return "Shows the listing of a background based on the entered query.";
     }
 
     @Override
@@ -55,18 +58,18 @@ public class ItemCommand extends ListenerAdapter implements ICommand {
         if (args.length == 0) {
             channel.sendMessage(new EmbedBuilder()
                 .setColor(Color.decode("#990011"))
-                .setTitle("Item - Invalid Usage")
+                .setTitle("Background - Invalid Usage")
                 .setDescription("Syntax: `" + CompendiumBot.getInstance().getPrefix() + command + " (query)`")
                 .build()).queue();
         } else {
             Message results = channel.sendMessage("Searching...").complete();
-            String query = String.join(" ", args).replaceAll("-noAlt", "").replaceAll(" {2,}", " ").trim();
-            List<Item> items = ElementRegistry.getInstance().findItemsByName(query, !Arrays.asList(args).contains("-noAlt"));
-            if (items.size() == 0) {
-                items = ElementRegistry.getInstance().findItemsByKeyword(query);
+            String query = String.join(" ", args).replaceAll(" {2,}", " ").trim();
+            List<Background> backgrounds = ElementRegistry.getInstance().findBackgroundsByName(query);
+            if (backgrounds.size() == 0) {
+                backgrounds = ElementRegistry.getInstance().findBackgroundsByKeyword(query);
             }
-            if (items.size() > 1) {
-                this.pendingChoices.put(sender.getId(), Pair.of(results, items));
+            if (backgrounds.size() > 1) {
+                this.pendingChoices.put(sender.getId(), Pair.of(results, backgrounds));
                 Paginator.Builder builder = new Paginator.Builder();
                 builder.showPageNumbers(true)
                     .setItemsPerPage(10)
@@ -77,7 +80,7 @@ public class ItemCommand extends ListenerAdapter implements ICommand {
                     .setUsers(sender)
                     .setColor(Color.decode("#c716c7"))
                     .setText("Multiple results were found with that query. Which one would you like to select?\n"
-                        + "(Type the number to display that item, `n` to go to the next page, `p` to go to the previous page, "
+                        + "(Type the number to display that background, `n` to go to the next page, `p` to go to the previous page, "
                         + "or `c` to cancel)")
                     .setFinalAction((msg) -> {
                         if (this.pendingChoices.containsKey(sender.getId())) {
@@ -86,21 +89,21 @@ public class ItemCommand extends ListenerAdapter implements ICommand {
                             channel.sendMessage("Search query timed out or was cancelled.").queue();
                         }
                     });
-                for (Item item : items) {
-                    builder.addItems("**" + (items.indexOf(item) + 1) + ".** " + item.getName()
-                        + " - " + item.getSource().getAbbreviation());
+                for (Background background : backgrounds) {
+                    builder.addItems("**" + (backgrounds.indexOf(background) + 1) + ".** " + background.getName()
+                        + " - " + background.getSource().getAbbreviation());
                 }
                 Paginator paginator = builder.build();
                 paginator.display(results);
                 this.initialiseWait(sender, channel);
-            } else if (items.size() == 1) {
+            } else if (backgrounds.size() == 1) {
                 this.safeDelete(results);
-                this.processItem(items.get(0), channel);
+                this.processBackground(backgrounds.get(0), channel);
             } else {
                 channel.sendMessage(new EmbedBuilder()
                     .setColor(Color.decode("#990011"))
-                    .setTitle("Item - Error")
-                    .setDescription("No potential items were found under the query `" + query + "`")
+                    .setTitle("Background - Error")
+                    .setDescription("No potential backgrounds were found under the query `" + query + "`")
                     .build()).queue();
             }
         }
@@ -122,8 +125,8 @@ public class ItemCommand extends ListenerAdapter implements ICommand {
         }
     }
 
-    private void processItem(Item item, MessageChannel channel) {
-        channel.sendMessage(ElementUtils.createItemSummary(item).build()).queue();
+    private void processBackground(Background background, MessageChannel channel) {
+        channel.sendMessage(ElementUtils.createBackgroundSummary(background).build()).queue();
     }
 
     private void initialiseWait(User sender, MessageChannel channel) {
@@ -133,14 +136,14 @@ public class ItemCommand extends ListenerAdapter implements ICommand {
             e -> {
                 String id = e.getAuthor().getId();
                 if (this.pendingChoices.containsKey(id)) {
-                    Pair<Message, List<Item>> choices = this.pendingChoices.get(id);
+                    Pair<Message, List<Background>> choices = this.pendingChoices.get(id);
                     String content = e.getMessage().getContentRaw();
                     try {
                         int choice = Integer.parseInt(content);
-                        Item itemChoice = choices.getRight().get(choice - 1);
-                        if (itemChoice != null) {
+                        Background backgroundChoice = choices.getRight().get(choice - 1);
+                        if (backgroundChoice != null) {
                             this.pendingChoices.remove(id);
-                            this.processItem(itemChoice, channel);
+                            this.processBackground(backgroundChoice, channel);
                         }
                     } catch (NumberFormatException ignored) {
                         if (content.equalsIgnoreCase("c")) {

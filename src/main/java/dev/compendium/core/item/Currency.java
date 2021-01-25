@@ -63,7 +63,6 @@ public class Currency {
 
     public void setName(String name) {
         this.name = name;
-        this.abbreviation = ElementUtils.abbreviate(this.getName());
     }
 
     @BsonProperty("abbreviation")
@@ -73,6 +72,10 @@ public class Currency {
 
     public void setAbbreviation(String abbreviation) {
         this.abbreviation = abbreviation;
+    }
+
+    public void updateAbbreviation() {
+        this.abbreviation = ElementUtils.abbreviate(this.getName());
     }
 
     @BsonProperty("gold_piece_equivalent")

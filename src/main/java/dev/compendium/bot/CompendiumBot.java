@@ -9,6 +9,7 @@ import dev.compendium.bot.commands.creation.SessionCommand;
 import dev.compendium.bot.commands.developer.DebugViewCommand;
 import dev.compendium.bot.commands.developer.ReloadCommand;
 import dev.compendium.bot.commands.dnd.RollCommand;
+import dev.compendium.bot.commands.elements.BackgroundCommand;
 import dev.compendium.bot.commands.elements.ItemCommand;
 import dev.compendium.bot.commands.general.PingCommand;
 import dev.compendium.bot.listeners.CommandListener;
@@ -151,6 +152,7 @@ public class CompendiumBot {
         //--
         this.registerCommand(new RollCommand());
         //--
+        this.registerCommand(new BackgroundCommand());
         this.registerCommand(new ItemCommand());
         //--
         this.registerCommand(new PingCommand());

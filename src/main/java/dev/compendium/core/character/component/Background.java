@@ -26,7 +26,7 @@ public class Background {
     @BsonProperty("language_uuids")
     private final List<UUID> languageUUIDs;
     @BsonProperty("equipment_uuids")
-    private final Map<UUID, Integer> equipmentUUIDs;
+    private final Map<String, Integer> equipmentUUIDs;
     @BsonProperty("feature_uuids")
     private final List<UUID> featureUUIDs;
     @BsonProperty("suggested_traits")
@@ -59,7 +59,7 @@ public class Background {
         @BsonProperty("name") String name,
         @BsonProperty("description") String description, @BsonProperty("proficiency_uuids") List<UUID> proficiencyUUIDs,
         @BsonProperty("language_uuids") List<UUID> languageUUIDs,
-        @BsonProperty("equipment_uuids") Map<UUID, Integer> equipmentUUIDs,
+        @BsonProperty("equipment_uuids") Map<String, Integer> equipmentUUIDs,
         @BsonProperty("feature_uuids") List<UUID> featureUUIDs,
         @BsonProperty("suggested_traits") List<String> suggestedTraits,
         @BsonProperty("suggested_ideals") List<String> suggestedIdeals,
@@ -175,15 +175,15 @@ public class Background {
     }
 
     @BsonProperty("equipment_uuids")
-    public Map<UUID, Integer> getEquipmentUUIDs() {
+    public Map<String, Integer> getEquipmentUUIDs() {
         return this.equipmentUUIDs;
     }
 
     @BsonIgnore
     public Map<Item, Integer> getEquipment() {
         Map<Item, Integer> equipment = new HashMap<>();
-        for (Map.Entry<UUID, Integer> entry : this.equipmentUUIDs.entrySet()) {
-            equipment.put(ElementRegistry.getInstance().getItemByUUID(entry.getKey()), entry.getValue());
+        for (Map.Entry<String, Integer> entry : this.equipmentUUIDs.entrySet()) {
+            equipment.put(ElementRegistry.getInstance().getItemByUUID(UUID.fromString(entry.getKey())), entry.getValue());
         }
         return equipment;
     }
@@ -193,7 +193,7 @@ public class Background {
     }
 
     public void addEquipment(UUID uuid, int amount) {
-        this.getEquipmentUUIDs().put(uuid, amount);
+        this.getEquipmentUUIDs().put(uuid.toString(), amount);
     }
 
     public void removeEquipment(Item item) {
@@ -201,7 +201,7 @@ public class Background {
     }
 
     public void removeEquipment(UUID uuid) {
-        this.getEquipmentUUIDs().remove(uuid);
+        this.getEquipmentUUIDs().remove(uuid.toString());
     }
 
     @BsonProperty("feature_uuids")

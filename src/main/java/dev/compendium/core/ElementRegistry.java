@@ -19,13 +19,14 @@ import dev.compendium.core.item.Currency;
 import dev.compendium.core.item.Item;
 import dev.compendium.core.spell.MagicSchool;
 import dev.compendium.core.spell.Spell;
+import dev.compendium.core.util.Choice;
 import dev.compendium.core.util.Creator;
+import dev.compendium.core.util.ElementUtils;
 import dev.compendium.core.util.Source;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.apache.commons.text.WordUtils;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
@@ -56,6 +57,8 @@ public class ElementRegistry {
                 .register(ClassModel.builder(Item.class).enableDiscriminator(true).build())
                 .register(ClassModel.builder(Currency.class).enableDiscriminator(true).build())
                 .register(ClassModel.builder(Creator.class).enableDiscriminator(true).build())
+                .register(ClassModel.builder(Background.class).enableDiscriminator(true).build())
+                .register(ClassModel.builder(Choice.class).enableDiscriminator(true).build())
                 .build()));
         LOGGER.info("Database connections initialised.");
     }
@@ -92,6 +95,14 @@ public class ElementRegistry {
         return this.getBackgrounds()
             .find(Filters.eq("_id", uuid))
             .first();
+    }
+
+    public List<Background> findBackgroundsByName(String name) {
+        name = ElementUtils.capitalise(name);
+        LOGGER.info("Finding background with name: {}", name);
+        return StreamSupport.stream(this.getBackgrounds()
+            .find(Filters.in("name", name)).spliterator(), false)
+            .collect(Collectors.toList());
     }
 
     public List<Background> findBackgroundsByKeyword(String keyword) {
@@ -244,16 +255,18 @@ public class ElementRegistry {
             .first();
     }
 
-    public List<Item> findItemsByName(String name) {
-        name = WordUtils.capitalizeFully(name);
+    public List<Item> findItemsByName(String name, boolean includeAltNames) {
+        name = ElementUtils.capitalise(name);
         LOGGER.info("Finding item with name: {}", name);
         List<Item> nameList = StreamSupport.stream(this.getItems()
             .find(Filters.in("name", name)).spliterator(), false)
             .collect(Collectors.toList());
-        List<Item> altNameList = StreamSupport.stream(this.getItems()
-            .find(Filters.in("alternative_names", name)).spliterator(), false)
-            .collect(Collectors.toList());
-        nameList.addAll(altNameList);
+        if (includeAltNames) {
+            List<Item> altNameList = StreamSupport.stream(this.getItems()
+                .find(Filters.in("alternative_names", name)).spliterator(), false)
+                .collect(Collectors.toList());
+            nameList.addAll(altNameList);
+        }
         return nameList;
     }
 
@@ -275,6 +288,12 @@ public class ElementRegistry {
     public List<MagicSchool> findMagicSchoolsBySource(UUID sourceUUID) {
         return StreamSupport.stream(this.getMagicSchools()
             .find(Filters.eq("source_uuid", sourceUUID)).spliterator(), false)
+            .collect(Collectors.toList());
+    }
+
+    public List<MagicSchool> findMagicSchoolsByName(String name) {
+        return StreamSupport.stream(this.getMagicSchools()
+            .find(Filters.in("name", name)).spliterator(), false)
             .collect(Collectors.toList());
     }
 

@@ -1,12 +1,13 @@
 package dev.compendium.bot.commands.dnd;
 
+import dev.compendium.bot.CompendiumBot;
 import dev.compendium.bot.commands.CommandCategory;
 import dev.compendium.bot.commands.ICommand;
+import dev.compendium.core.util.ElementUtils;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,17 +16,22 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.internal.utils.tuple.Pair;
 import uk.co.binaryoverload.dicerollparser.Parser;
+import uk.co.binaryoverload.dicerollparser.enums.Operator;
+import uk.co.binaryoverload.dicerollparser.objects.AddedValue;
 import uk.co.binaryoverload.dicerollparser.objects.DiceRoll;
 import uk.co.binaryoverload.dicerollparser.objects.Die;
 import uk.co.binaryoverload.dicerollparser.objects.Modifier;
 
 // have to suppress dupe code because intellij doesn't like my min/max methods
-@SuppressWarnings("DuplicatedCode")
+// spaghetti ahead
+@SuppressWarnings({"DuplicatedCode", "unchecked"})
 public class RollCommand implements ICommand {
 
     @Override
@@ -48,69 +54,352 @@ public class RollCommand implements ICommand {
         return CommandCategory.DND;
     }
 
-    // everything from here until line 125 is a fucking mess
     @Override
     public void onCommand(User sender, Message message, MessageChannel channel, String command, String[] args) {
         if (args.length > 0) {
             List<DiceRoll> rolls = Parser.parseDiceRoll(args[0]);
-            StringBuilder sb = new StringBuilder("**Roll:** ");
-            Map<DiceRoll, Map<Die, List<Long>>> finalRollValues = new HashMap<>();
+            StringBuilder parsedSection = new StringBuilder();
             for (DiceRoll roll : rolls) {
-                System.out.println(roll.toString());
-                Map<Die, List<Long>> diceRollValues = new HashMap<>();
-                for (Die die : roll.getDice()) {
-                    List<Long> rollValues = new ArrayList<>();
-                    if (die.getDiceCount() <= 0) {
-                        this.sendErrorMessage(channel, "Invalid roll: Cannot have 0 dice "
-                            + "(`" + die.getDiceCount() + "d" + die.getDiceValue() + "`)");
-                        break;
-                    }
-                    for (int i = 0; i < die.getDiceCount(); i++) {
-                        long rollValue = ThreadLocalRandom.current().nextLong(1, die.getDiceValue() + 1);
-                        rollValues.add(rollValue);
-                    }
-                    diceRollValues.put(die, rollValues);
-                }
-                Pair<Boolean, Object> modifierResult = this.processModifiers(diceRollValues, roll);
-                if (modifierResult.getLeft()) {
-                    diceRollValues = (Map<Die, List<Long>>) modifierResult.getRight();
-                } else {
-                    this.sendErrorMessage(channel, "Roll failed while applying modifiers: "
-                        + modifierResult.getRight());
-                    return;
-                }
-                finalRollValues.put(roll, diceRollValues);
+                parsedSection.append(this.createDieString(roll));
             }
-            for (Map.Entry<DiceRoll, Map<Die, List<Long>>> entry : finalRollValues.entrySet()) {
-                for (Map.Entry<Die, List<Long>> innerEntry : entry.getValue().entrySet()) {
-                    channel.sendMessage(Arrays.toString(innerEntry.getValue().toArray())).queue();
+            String remainder = args[0].replace(parsedSection.toString(), "");
+            StringBuilder sb = new StringBuilder("**Input: **");
+            if (rolls.size() > 0) {
+                Map<DiceRoll, Map<Die, List<Long>>> finalRollValues = new LinkedHashMap<>();
+                for (DiceRoll roll : rolls) {
+                    Map<Die, List<Long>> diceRollValues = new LinkedHashMap<>();
+                    for (Die die : roll.getDice()) {
+                        List<Long> rollValues = new ArrayList<>();
+                        if (die.getDiceCount() <= 0) {
+                            this.sendErrorMessage(channel, "Invalid roll: Cannot have 0 dice "
+                                + "(`" + die.getDiceCount() + "d" + die.getDiceValue() + "`)");
+                            break;
+                        }
+                        for (int i = 0; i < die.getDiceCount(); i++) {
+                            long rollValue = ThreadLocalRandom.current().nextLong(1, die.getDiceValue() + 1);
+                            rollValues.add(rollValue);
+                        }
+                        diceRollValues.put(die, rollValues);
+                    }
+                    Pair<Boolean, Object> modifierResult = this.processModifiers(diceRollValues, roll);
+                    if (modifierResult.getLeft()) {
+                        diceRollValues = (Map<Die, List<Long>>) modifierResult.getRight();
+                    } else {
+                        this.sendErrorMessage(channel, "Roll failed while applying modifiers: "
+                            + modifierResult.getRight());
+                        return;
+                    }
+                    finalRollValues.put(roll, diceRollValues);
                 }
-            }
-            /*
-                if (dieRollValues.size() > 0) {
-                    StringBuilder sb = new StringBuilder("**Result: **");
-                    for (Map.Entry<Die, List<Long>> entry : dieRollValues.entrySet()) {
-                        Die die = entry.getKey();
-                        List<Long> rolledValues = entry.getValue();
-                        long totalValue = 0;
-                        long indicator = 1;
-                        sb.append(die.getDiceCount()).append("d").append(die.getDiceValue()).append(" (");
-                        for (long value : rolledValues) {
-                            totalValue += value;
-                            sb.append(value);
-                            if (indicator != rolledValues.size()) {
+                Map<DiceRoll, Long> finalRolls = new LinkedHashMap<>();
+                for (Map.Entry<DiceRoll, Map<Die, List<Long>>> entry : finalRollValues.entrySet()) {
+                    long finalRoll = 0;
+                    DiceRoll roll = entry.getKey();
+                    Map<Die, List<Long>> rollResults = entry.getValue();
+                    if (roll.getDice().size() > 1) {
+                        sb.append("(");
+                        for (Die die : roll.getDice()) {
+                            List<Long> dieResults = rollResults.get(die);
+                            int indicator = 1;
+                            sb.append(die.getDiceCount()).append("d").append(die.getDiceValue()).append(" (");
+                            for (long result : dieResults) {
+                                finalRoll += result;
+                                if (result == 1 || result == die.getDiceValue()) {
+                                    sb.append("**").append(result).append("**");
+                                } else {
+                                    sb.append(result);
+                                }
+                                if (indicator != dieResults.size()) {
+                                    sb.append(", ");
+                                }
+                                indicator++;
+                            }
+                            sb.append(")");
+                            if (roll.getDice().indexOf(die) != roll.getDice().size() - 1) {
+                                sb.append(", ");
+                            }
+                        }
+                        sb.append(")").append(this.createModifierString(roll));
+                    } else {
+                        Die die = roll.getDice().get(0);
+                        List<Long> dieResults = rollResults.get(die);
+                        sb.append(die.getDiceCount()).append("d").append(die.getDiceValue())
+                            .append(this.createModifierString(roll)).append(" (");
+                        int indicator = 1;
+                        for (long result : dieResults) {
+                            finalRoll += result;
+                            if (result == 1 || result == die.getDiceValue()) {
+                                sb.append("**").append(result).append("**");
+                            } else {
+                                sb.append(result);
+                            }
+                            if (indicator != dieResults.size()) {
                                 sb.append(", ");
                             }
                             indicator++;
                         }
-                        sb.append(")\n**Total: **").append(totalValue).append("\n");
+                        sb.append(")");
                     }
-                    channel.sendMessage(sb.toString().trim()).queue();
+                    for (AddedValue addedValue : roll.getAddedValue()) {
+                        switch (addedValue.getOperator()) {
+                            case ADD:
+                                sb.append(" + ");
+                                finalRoll += addedValue.getValue();
+                                break;
+                            case SUBTRACT:
+                                sb.append(" - ");
+                                finalRoll -= addedValue.getValue();
+                                break;
+                            case MULTIPLY:
+                                sb.append(" \\* ");
+                                finalRoll *= addedValue.getValue();
+                                break;
+                            case DIVIDE:
+                                sb.append(" / ");
+                                finalRoll /= addedValue.getValue();
+                                break;
+                        }
+                        int value = addedValue.getValue().intValue();
+                        if (value == addedValue.getValue()) {
+                            sb.append(value);
+                        } else {
+                            sb.append(addedValue.getValue());
+                        }
+                    }
+                    if (roll.getLabel() != null) {
+                        sb.append(" [").append(roll.getLabel()).append("]");
+                    }
+                    if (roll.getOperator() != null) {
+                        switch (roll.getOperator()) {
+                            case ADD:
+                                sb.append(" + ");
+                                break;
+                            case SUBTRACT:
+                                sb.append(" - ");
+                                break;
+                            case MULTIPLY:
+                                sb.append(" \\* ");
+                                break;
+                            case DIVIDE:
+                                sb.append(" / ");
+                                break;
+                        }
+                    }
+                    finalRolls.put(roll, finalRoll);
                 }
-                */
+                Map<String, Long> labelledRolls = new LinkedHashMap<>();
+                long theActualFinalResult = 0;
+                Operator nextOperator = null;
+                for (Map.Entry<DiceRoll, Long> finalRoll : finalRolls.entrySet()) {
+                    String label = finalRoll.getKey().getLabel();
+                    if (label != null) {
+                        if (labelledRolls.containsKey(label)) {
+                            long value = labelledRolls.get(label);
+                            labelledRolls.put(label, value + finalRoll.getValue());
+                        } else {
+                            labelledRolls.put(label, finalRoll.getValue());
+                        }
+                    }
+                    if (nextOperator == null) {
+                        theActualFinalResult += finalRoll.getValue();
+                    } else {
+                        switch (nextOperator) {
+                            case ADD:
+                                theActualFinalResult += finalRoll.getValue();
+                                break;
+                            case SUBTRACT:
+                                theActualFinalResult -= finalRoll.getValue();
+                                break;
+                            case MULTIPLY:
+                                theActualFinalResult *= finalRoll.getValue();
+                                break;
+                            case DIVIDE:
+                                theActualFinalResult /= finalRoll.getValue();
+                                break;
+                        }
+                    }
+                    nextOperator = finalRoll.getKey().getOperator();
+                }
+                if (!remainder.equals("")) {
+                    if (remainder.contains("[")) {
+                        try {
+                            String val = remainder.substring(0, remainder.indexOf('['));
+                            String label = remainder.substring(remainder.indexOf('[') + 1).replaceAll("]", "");
+                            long valAsLong = (long) ElementUtils.eval(val);
+                            if (nextOperator != null) {
+                                switch (nextOperator) {
+                                    case ADD:
+                                        theActualFinalResult += valAsLong;
+                                        break;
+                                    case SUBTRACT:
+                                        theActualFinalResult -= valAsLong;
+                                        break;
+                                    case MULTIPLY:
+                                        theActualFinalResult *= valAsLong;
+                                        break;
+                                    case DIVIDE:
+                                        theActualFinalResult /= valAsLong;
+                                        break;
+                                }
+                            } else {
+                                theActualFinalResult += valAsLong;
+                            }
+                            labelledRolls.put(label, valAsLong);
+                            sb.append(valAsLong).append(" [").append(label).append("]");
+                        } catch (NumberFormatException ignored) {
+                        }
+                    } else {
+                        long valAsLong = (long) ElementUtils.eval(remainder);
+                        theActualFinalResult += valAsLong;
+                    }
+                }
+                if (sb.toString().length() > 1800) {
+                    sb = new StringBuilder("your roll was too long to display, here's the important parts:");
+                }
+                for (Map.Entry<String, Long> labelledRoll : labelledRolls.entrySet()) {
+                    sb.append("\n**").append(labelledRoll.getKey()).append(":** ").append(labelledRoll.getValue());
+                }
+                sb.append("\n**Total:** ").append(theActualFinalResult);
+            } else {
+                double res = ElementUtils.eval(args[0]);
+                sb.append(args[0]).append("\n**Total:** ").append((int) Math.floor(res))
+                    .append(" (").append(res).append(")");
+            }
+
+            channel.sendMessage(new MessageBuilder()
+                .setContent(sender.getAsMention())
+                .setEmbed(new EmbedBuilder()
+                    .setTitle("Roll - " + (args.length > 1 ? Arrays.stream(args).skip(1).collect(Collectors.joining(" "))
+                        : "Results"))
+                    .setDescription(sb.toString().trim())
+                    .build())
+                .build()).queue();
         } else {
-            channel.sendMessage("invalid").queue();
+            this.sendErrorMessage(channel, "Invalid syntax: `" + CompendiumBot.getInstance().getPrefix()
+                + command + " (dice query) name");
         }
+        try {
+            message.delete().queue();
+        } catch (InsufficientPermissionException ignored) {
+
+        }
+    }
+
+    private String createDieString(DiceRoll roll) {
+        StringBuilder sb = new StringBuilder();
+        if (roll.getDice().size() > 1) {
+            sb.append("(");
+            for (Die die : roll.getDice()) {
+                sb.append(die.getDiceCount()).append("d").append(die.getDiceValue());
+                if (roll.getDice().indexOf(die) != roll.getDice().size() - 1) {
+                    sb.append(",");
+                }
+            }
+            sb.append(")");
+        } else {
+            Die die = roll.getDice().get(0);
+            sb.append(die.getDiceCount()).append("d").append(die.getDiceValue());
+        }
+        sb.append(this.createModifierString(roll));
+        for (AddedValue addedValue : roll.getAddedValue()) {
+            switch (addedValue.getOperator()) {
+                case ADD:
+                    sb.append("+");
+                    break;
+                case SUBTRACT:
+                    sb.append("-");
+                    break;
+                case MULTIPLY:
+                    sb.append("*");
+                    break;
+                case DIVIDE:
+                    sb.append("/");
+                    break;
+            }
+            int value = addedValue.getValue().intValue();
+            if (value == addedValue.getValue()) {
+                sb.append(value);
+            } else {
+                sb.append(addedValue.getValue());
+            }
+        }
+        if (roll.getLabel() != null) {
+            sb.append("[").append(roll.getLabel()).append("]");
+        }
+        if (roll.getOperator() != null) {
+            switch (roll.getOperator()) {
+                case ADD:
+                    sb.append("+");
+                    break;
+                case SUBTRACT:
+                    sb.append("-");
+                    break;
+                case MULTIPLY:
+                    sb.append("*");
+                    break;
+                case DIVIDE:
+                    sb.append("/");
+                    break;
+            }
+        }
+        return sb.toString();
+    }
+
+    private String createModifierString(DiceRoll roll) {
+        StringBuilder sb = new StringBuilder();
+        for (Modifier modifier : roll.getModifiers()) {
+            switch (modifier.getType()) {
+                case REROLL:
+                    sb.append("rr");
+                    break;
+                case REROLL_ONE:
+                    sb.append("ro");
+                    break;
+                case REROLL_ADD:
+                    sb.append("ra");
+                    break;
+                case MINIMUM:
+                    sb.append("mi");
+                    break;
+                case MAXIMUM:
+                    sb.append("ma");
+                    break;
+                case EXPLODE:
+                    sb.append("e");
+                    break;
+                case KEEP:
+                    sb.append("k");
+                    break;
+                case DROP:
+                    sb.append("d");
+                    break;
+            }
+            if (modifier.getSelector() != null) {
+                switch (modifier.getSelector()) {
+                    case GREATER_THAN:
+                        sb.append(">");
+                        break;
+                    case LESS_THAN:
+                        sb.append("<");
+                        break;
+                    case LOW:
+                        sb.append("l");
+                        break;
+                    case HIGH:
+                        sb.append("h");
+                        break;
+                }
+                int value = modifier.getSelectorValue().intValue();
+                if (value == modifier.getSelectorValue()) {
+                    sb.append(value);
+                } else {
+                    sb.append(modifier.getSelectorValue());
+                }
+            } else {
+                sb.append(modifier.getValue());
+            }
+        }
+        return sb.toString().trim();
     }
 
     private void sendErrorMessage(MessageChannel channel, String error) {
@@ -180,7 +469,7 @@ public class RollCommand implements ICommand {
             }
             do {
                 rollIndexes.replaceAll((k, v) -> v = ThreadLocalRandom.current().nextLong(1, die.getDiceValue() + 1));
-            } while (rollIndexes.containsValue((long) modifier.getValue()));
+            } while (rollIndexes.containsValue(modifier.getValue().longValue()));
             return Pair.of(true, rollIndexes);
         }
         switch (modifier.getSelector()) {
@@ -194,7 +483,7 @@ public class RollCommand implements ICommand {
                 for (Map.Entry<Long, Long> rollIndex : rollIndexes.entrySet()) {
                     if (rollIndex.getValue() > modifier.getSelectorValue()) {
                         rollIndexes.replace(rollIndex.getKey(),
-                            ThreadLocalRandom.current().nextLong(1, modifier.getSelectorValue() + 1));
+                            ThreadLocalRandom.current().nextLong(1, modifier.getSelectorValue().longValue() + 1));
                     }
                 }
                 return Pair.of(true, rollIndexes);
@@ -207,7 +496,7 @@ public class RollCommand implements ICommand {
                 for (Map.Entry<Long, Long> rollIndex : rollIndexes.entrySet()) {
                     if (rollIndex.getValue() < modifier.getSelectorValue()) {
                         rollIndexes.replace(rollIndex.getKey(),
-                            ThreadLocalRandom.current().nextLong(modifier.getSelectorValue(), die.getDiceValue() + 1));
+                            ThreadLocalRandom.current().nextLong(modifier.getSelectorValue().longValue(), die.getDiceValue() + 1));
                     }
                 }
                 return Pair.of(true, rollIndexes);
@@ -227,7 +516,7 @@ public class RollCommand implements ICommand {
                 return Pair.of(false, "Default selector value cannot be less than or equal to 0");
             }
             for (Map.Entry<Long, Long> rollIndex : rollIndexes.entrySet()) {
-                if (rollIndex.getValue() == (long) modifier.getValue()) {
+                if (rollIndex.getValue() == modifier.getValue().longValue()) {
                     rollIndexes.replace(rollIndex.getKey(),
                         ThreadLocalRandom.current().nextLong(1, die.getDiceValue() + 1));
                 }
@@ -292,7 +581,7 @@ public class RollCommand implements ICommand {
                 return Pair.of(false, "Default selector value cannot be less than or equal to 0");
             }
             for (Map.Entry<Long, Long> rollIndex : rollIndexes.entrySet()) {
-                if (rollIndex.getValue() == (long) modifier.getValue()) {
+                if (rollIndex.getValue() == modifier.getValue().longValue()) {
                     rollIndexes.put((long) rollIndexes.size(),
                         ThreadLocalRandom.current().nextLong(1, die.getDiceValue() + 1));
                     break;
@@ -360,7 +649,7 @@ public class RollCommand implements ICommand {
             }
             for (Map.Entry<Long, Long> rollIndex : rollIndexes.entrySet()) {
                 if (rollIndex.getValue() < modifier.getValue()) {
-                    rollIndexes.replace(rollIndex.getKey(), (long) modifier.getValue());
+                    rollIndexes.replace(rollIndex.getKey(), modifier.getValue().longValue());
                 }
             }
             return Pair.of(true, rollIndexes);
@@ -379,7 +668,7 @@ public class RollCommand implements ICommand {
             }
             for (Map.Entry<Long, Long> rollIndex : rollIndexes.entrySet()) {
                 if (rollIndex.getValue() > modifier.getValue()) {
-                    rollIndexes.replace(rollIndex.getKey(), (long) modifier.getValue());
+                    rollIndexes.replace(rollIndex.getKey(), modifier.getValue().longValue());
                 }
             }
             return Pair.of(true, rollIndexes);
@@ -397,12 +686,13 @@ public class RollCommand implements ICommand {
                 return Pair.of(false, "Default selector value cannot be less than or equal to 0");
             }
             for (Map.Entry<Long, Long> rollIndex : rollIndexes.entrySet()) {
-                if (rollIndex.getValue() == (long) modifier.getValue()) {
+                if (rollIndex.getValue() == modifier.getValue().longValue()) {
                     while (true) {
                         long res = ThreadLocalRandom.current().nextLong(1, die.getDiceValue() + 1);
                         rollIndexes.put((long) rollIndexes.size(), res);
-                        if (res != modifier.getValue())
+                        if (res != modifier.getValue()) {
                             break;
+                        }
                     }
                 }
             }
@@ -415,12 +705,13 @@ public class RollCommand implements ICommand {
                     return Pair.of(false, "Greater than selector value cannot be less than or equal to 0");
                 }
                 for (Map.Entry<Long, Long> rollIndex : rollIndexes.entrySet()) {
-                    if (rollIndex.getValue() > (long) modifier.getSelectorValue()) {
+                    if (rollIndex.getValue() > modifier.getSelectorValue().longValue()) {
                         while (true) {
                             long res = ThreadLocalRandom.current().nextLong(1, die.getDiceValue() + 1);
                             rollIndexes.put((long) rollIndexes.size(), res);
-                            if (res <= modifier.getSelectorValue())
+                            if (res <= modifier.getSelectorValue()) {
                                 break;
+                            }
                         }
                     }
                 }
@@ -432,12 +723,13 @@ public class RollCommand implements ICommand {
                     return Pair.of(false, "Less than selector value cannot be less than or equal to 1");
                 }
                 for (Map.Entry<Long, Long> rollIndex : rollIndexes.entrySet()) {
-                    if (rollIndex.getValue() < (long) modifier.getSelectorValue()) {
+                    if (rollIndex.getValue() < modifier.getSelectorValue().longValue()) {
                         while (true) {
                             long res = ThreadLocalRandom.current().nextLong(1, die.getDiceValue() + 1);
                             rollIndexes.put((long) rollIndexes.size(), res);
-                            if (res >= modifier.getSelectorValue())
+                            if (res >= modifier.getSelectorValue()) {
                                 break;
+                            }
                         }
                     }
                 }
@@ -473,7 +765,7 @@ public class RollCommand implements ICommand {
                 return Pair.of(false, "Default selector value cannot be less than or equal to 0");
             }
             for (Map.Entry<Long, Long> rollIndex : rollIndexes.entrySet()) {
-                if (rollIndex.getValue() != (long) modifier.getValue()) {
+                if (rollIndex.getValue() != modifier.getValue().longValue()) {
                     rollIndexes.remove(rollIndex.getKey());
                 }
             }
@@ -511,7 +803,7 @@ public class RollCommand implements ICommand {
                     return Pair.of(false, "Lowest selector value cannot be less than or equal to 0");
                 }
                 rollIndexes = rollIndexes.entrySet().stream().sorted(Map.Entry.comparingByValue())
-                    .limit(modifier.getSelectorValue())
+                    .limit(modifier.getSelectorValue().longValue())
                     .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
                 return Pair.of(true, rollIndexes);
             case HIGH:
@@ -522,7 +814,7 @@ public class RollCommand implements ICommand {
                 }
                 rollIndexes = rollIndexes.entrySet().stream()
                     .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-                    .limit(modifier.getSelectorValue())
+                    .limit(modifier.getSelectorValue().longValue())
                     .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
                 return Pair.of(true, rollIndexes);
         }
@@ -537,7 +829,7 @@ public class RollCommand implements ICommand {
                 return Pair.of(false, "Default selector value cannot be less than or equal to 0");
             }
             for (Map.Entry<Long, Long> rollIndex : rollIndexes.entrySet()) {
-                if (rollIndex.getValue() == (long) modifier.getValue()) {
+                if (rollIndex.getValue() == modifier.getValue().longValue()) {
                     rollIndexes.remove(rollIndex.getKey());
                 }
             }
@@ -575,7 +867,7 @@ public class RollCommand implements ICommand {
                     return Pair.of(false, "Lowest selector value cannot be less than or equal to 0");
                 }
                 rollIndexes = rollIndexes.entrySet().stream().sorted(Map.Entry.comparingByValue())
-                    .skip(modifier.getSelectorValue())
+                    .skip(modifier.getSelectorValue().longValue())
                     .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
                 return Pair.of(true, rollIndexes);
             case HIGH:
@@ -586,7 +878,7 @@ public class RollCommand implements ICommand {
                 }
                 rollIndexes = rollIndexes.entrySet().stream()
                     .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-                    .skip(modifier.getSelectorValue())
+                    .skip(modifier.getSelectorValue().longValue())
                     .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
                 return Pair.of(true, rollIndexes);
         }
@@ -608,7 +900,7 @@ public class RollCommand implements ICommand {
 
     private Pair<Boolean, Object> highLowExplodeIteration(Map<Long, Long> rollIndexes, Modifier modifier, Die die) {
         int iteration = 0;
-        for (Map.Entry<Long, Long> entry : rollIndexes.entrySet()) {
+        for (Map.Entry<Long, Long> ignored : rollIndexes.entrySet()) {
             rollIndexes.put((long) rollIndexes.size(), ThreadLocalRandom.current().nextLong(1, die.getDiceValue() + 1));
             iteration++;
             if (iteration >= modifier.getSelectorValue()) {

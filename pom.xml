@@ -92,17 +92,19 @@
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-text</artifactId>
-            <version>1.9</version>
-        </dependency>
         <!-- tysm binary ily <3 <3 <3 <3 <3 -->
         <!-- source: https://github.com/binaryoverload/dicerollparser -->
         <dependency>
             <groupId>co.uk.binaryoverload</groupId>
             <artifactId>DiceRollParser</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jagrosh</groupId>
+            <artifactId>jda-utilities</artifactId>
+            <version>3.0.5</version>
+            <scope>compile</scope>
+            <type>pom</type>
         </dependency>
     </dependencies>
 </project>

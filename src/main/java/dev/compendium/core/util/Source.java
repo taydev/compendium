@@ -91,6 +91,9 @@ public class Source {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void updateAbbreviation() {
         this.abbreviation = ElementUtils.abbreviate(this.name);
     }
 
