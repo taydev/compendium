@@ -98,8 +98,8 @@ public class Source {
     }
 
     /**
-     * Returns the abbreviation of the name of the source. This is typically a String comprised of the first letter in
-     * each word of the source name.
+     * Returns the abbreviation of the name of the source. This is typically a String comprised of the first letter in each word
+     * of the source name.
      *
      * @return The source name's abbreviation.
      */
@@ -108,8 +108,8 @@ public class Source {
     }
 
     /**
-     * Manually updates the abbreviation of the source's name. This is typically automatically generated at the initial
-     * creation of the source, however can be modified using this setter.
+     * Manually updates the abbreviation of the source's name. This is typically automatically generated at the initial creation
+     * of the source, however can be modified using this setter.
      *
      * @param abbreviation The new abbreviation of the source's name.
      */
@@ -137,8 +137,8 @@ public class Source {
     }
 
     /**
-     * Returns the URL of the author that created the source. This is typically a link to a website, and is set to the
-     * author's name by default.
+     * Returns the URL of the author that created the source. This is typically a link to a website, and is set to the author's
+     * name by default.
      *
      * @return The URL of the author of the source.
      */
@@ -157,8 +157,7 @@ public class Source {
     }
 
     /**
-     * Returns the Discord ID of the source creator. Used for identification and permissions management. This cannot be
-     * changed.
+     * Returns the Discord ID of the source creator. Used for identification and permissions management. This cannot be changed.
      *
      * @return The Discord ID of the source creator.
      */
@@ -168,8 +167,8 @@ public class Source {
     }
 
     /**
-     * Returns a list of Discord IDs associated with the source. Used for permissions management to determine who can
-     * edit or add to the source's elements.
+     * Returns a list of Discord IDs associated with the source. Used for permissions management to determine who can edit or add
+     * to the source's elements.
      *
      * @return The associated Discord IDs of the source.
      */
@@ -179,8 +178,8 @@ public class Source {
     }
 
     /**
-     * Adds a Discord ID to the source's list. Adding an ID this way grants the added ID access to add or remove
-     * elements to or from the source.
+     * Adds a Discord ID to the source's list. Adding an ID this way grants the added ID access to add or remove elements to or
+     * from the source.
      *
      * @param discordID The Discord ID to add to the source.
      */
@@ -189,8 +188,8 @@ public class Source {
     }
 
     /**
-     * Removes a Discord ID from the source's list. Removing an ID from the list removes the user associated with the
-     * ID's ability to modify things within the source.
+     * Removes a Discord ID from the source's list. Removing an ID from the list removes the user associated with the ID's ability
+     * to modify things within the source.
      *
      * @param discordID The Discord ID to remove from the source.
      */

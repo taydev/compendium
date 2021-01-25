@@ -496,7 +496,8 @@ public class RollCommand implements ICommand {
                 for (Map.Entry<Long, Long> rollIndex : rollIndexes.entrySet()) {
                     if (rollIndex.getValue() < modifier.getSelectorValue()) {
                         rollIndexes.replace(rollIndex.getKey(),
-                            ThreadLocalRandom.current().nextLong(modifier.getSelectorValue().longValue(), die.getDiceValue() + 1));
+                            ThreadLocalRandom.current()
+                                .nextLong(modifier.getSelectorValue().longValue(), die.getDiceValue() + 1));
                     }
                 }
                 return Pair.of(true, rollIndexes);

@@ -8,7 +8,6 @@ import dev.compendium.core.item.Currency;
 import dev.compendium.core.item.Item;
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,8 +31,9 @@ public class ElementUtils {
             }
 
             boolean eat(int charToEat) {
-                while (ch == ' ')
+                while (ch == ' ') {
                     nextChar();
+                }
                 if (ch == charToEat) {
                     nextChar();
                     return true;
@@ -44,8 +44,9 @@ public class ElementUtils {
             double parse() {
                 nextChar();
                 double x = parseExpression();
-                if (pos < str.length())
+                if (pos < str.length()) {
                     throw new RuntimeException("Unexpected: " + (char) ch);
+                }
                 return x;
             }
 
@@ -58,32 +59,36 @@ public class ElementUtils {
             double parseExpression() {
                 double x = parseTerm();
                 for (; ; ) {
-                    if (eat('+'))
+                    if (eat('+')) {
                         x += parseTerm(); // addition
-                    else if (eat('-'))
+                    } else if (eat('-')) {
                         x -= parseTerm(); // subtraction
-                    else
+                    } else {
                         return x;
+                    }
                 }
             }
 
             double parseTerm() {
                 double x = parseFactor();
                 for (; ; ) {
-                    if (eat('*'))
+                    if (eat('*')) {
                         x *= parseFactor(); // multiplication
-                    else if (eat('/'))
+                    } else if (eat('/')) {
                         x /= parseFactor(); // division
-                    else
+                    } else {
                         return x;
+                    }
                 }
             }
 
             double parseFactor() {
-                if (eat('+'))
+                if (eat('+')) {
                     return parseFactor(); // unary plus
-                if (eat('-'))
+                }
+                if (eat('-')) {
                     return -parseFactor(); // unary minus
+                }
 
                 double x;
                 int startPos = this.pos;
@@ -91,12 +96,14 @@ public class ElementUtils {
                     x = parseExpression();
                     eat(')');
                 } else if ((ch >= '0' && ch <= '9') || ch == '.') { // numbers
-                    while ((ch >= '0' && ch <= '9') || ch == '.')
+                    while ((ch >= '0' && ch <= '9') || ch == '.') {
                         nextChar();
+                    }
                     x = Double.parseDouble(str.substring(startPos, this.pos));
                 } else if (ch >= 'a' && ch <= 'z') { // functions
-                    while (ch >= 'a' && ch <= 'z')
+                    while (ch >= 'a' && ch <= 'z') {
                         nextChar();
+                    }
                     String func = str.substring(startPos, this.pos);
                     x = parseFactor();
                     switch (func) {
@@ -119,8 +126,9 @@ public class ElementUtils {
                     throw new RuntimeException("Unexpected: " + (char) ch);
                 }
 
-                if (eat('^'))
+                if (eat('^')) {
                     x = Math.pow(x, parseFactor()); // exponentiation
+                }
 
                 return x;
             }
