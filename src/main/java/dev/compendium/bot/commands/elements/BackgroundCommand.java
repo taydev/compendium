@@ -126,7 +126,7 @@ public class BackgroundCommand implements ICommand {
     }
 
     private void processBackground(Background background, MessageChannel channel) {
-        channel.sendMessage(ElementUtils.createBackgroundSummary(background).build()).queue();
+        ElementUtils.sendBackgroundSummary(background, channel);
     }
 
     private void initialiseWait(User sender, MessageChannel channel) {

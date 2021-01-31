@@ -2,6 +2,7 @@ package dev.compendium.core.spell;
 
 import dev.compendium.core.ElementRegistry;
 import dev.compendium.core.character.component.CharacterClass;
+import dev.compendium.core.character.component.Subclass;
 import dev.compendium.core.util.Metadata;
 import dev.compendium.core.util.RangeUnit;
 import dev.compendium.core.util.Source;
@@ -19,26 +20,52 @@ public class Spell {
 
     @BsonId
     private final UUID uuid;
+    @BsonProperty("source_uuid")
     private final UUID sourceUUID;
+    @BsonProperty("additional_tags")
     private final List<String> additionalTags;
+    @BsonProperty("class_uuids")
     private final List<UUID> classUUIDs;
+    @BsonProperty("subclass_uuids")
+    private final List<UUID> subclassUUIDs;
+    @BsonProperty("metadata")
     private final Metadata metadata;
+    @BsonProperty("name")
     private String name;
+    @BsonProperty("level")
     private int level;
+    @BsonProperty("school_uuid")
     private UUID schoolUUID;
+    @BsonProperty("ritual")
     private boolean ritual;
+    @BsonProperty("casting_duration")
     private int castingDuration;
+    @BsonProperty("casting_time_unit")
     private TimeUnit timeUnit;
+    @BsonProperty("reaction_condition")
+    private String reactionCondition;
+    @BsonProperty("casting_range")
     private int castingRange;
+    @BsonProperty("casting_range_unit")
     private RangeUnit rangeUnit;
+    @BsonProperty("duration")
     private int duration;
+    @BsonProperty("duration_time_unit")
     private TimeUnit durationUnit;
+    @BsonProperty("concentration")
     private boolean concentration;
+    @BsonProperty("verbal_component")
     private boolean verbalComponent;
+    @BsonProperty("somatic_component")
     private boolean somaticComponent;
+    @BsonProperty("material_component")
     private boolean materialComponent;
+    @BsonProperty("materials")
     private String materials;
+    @BsonProperty("description")
     private String description;
+    @BsonProperty("upcast_description")
+    private String upcastDescription;
 
     public Spell(Source source, String name) {
         this(source.getUUID(), name);
@@ -46,8 +73,8 @@ public class Spell {
 
     public Spell(UUID sourceUUID, String name) {
         this(ElementRegistry.getInstance().createSpellUUID(), sourceUUID, name, 0, UUID.randomUUID(), false,
-            new ArrayList<>(), 1, TimeUnit.ACTION, 30, RangeUnit.FOOT, 0, TimeUnit.ACTION, false, false, false, false,
-            "", new ArrayList<>(), "", new Metadata());
+            new ArrayList<>(), 1, TimeUnit.ACTION, "", 30, RangeUnit.FOOT, 0, TimeUnit.ACTION, false, false, false, false,
+            "", new ArrayList<>(), new ArrayList<>(), "", "", new Metadata());
     }
 
     @BsonCreator
@@ -55,12 +82,13 @@ public class Spell {
         @BsonProperty("level") int level, @BsonProperty("school_uuid") UUID schoolUUID,
         @BsonProperty("ritual") boolean ritual, @BsonProperty("additional_tags") List<String> additionalTags,
         @BsonProperty("casting_duration") int castingDuration, @BsonProperty("casting_time_unit") TimeUnit timeUnit,
-        @BsonProperty("casting_range") int castingRange, @BsonProperty("casting_range_unit") RangeUnit rangeUnit,
-        @BsonProperty("duration") int duration, @BsonProperty("duration_unit") TimeUnit durationUnit,
-        @BsonProperty("concentration") boolean concentration, @BsonProperty("verbal_component") boolean verbalComponent,
-        @BsonProperty("somatic_component") boolean somaticComponent,
+        @BsonProperty("reaction_condition") String reactionCondition, @BsonProperty("casting_range") int castingRange,
+        @BsonProperty("casting_range_unit") RangeUnit rangeUnit, @BsonProperty("duration") int duration,
+        @BsonProperty("duration_time_unit") TimeUnit durationUnit, @BsonProperty("concentration") boolean concentration,
+        @BsonProperty("verbal_component") boolean verbalComponent, @BsonProperty("somatic_component") boolean somaticComponent,
         @BsonProperty("material_component") boolean materialComponent, @BsonProperty("materials") String materials,
-        @BsonProperty("classes") List<UUID> classUUIDs, @BsonProperty("description") String description,
+        @BsonProperty("class_uuids") List<UUID> classUUIDs, @BsonProperty("subclass_uuids") List<UUID> subclassUUIDs,
+        @BsonProperty("description") String description, @BsonProperty("upcast_description") String upcastDescription,
         @BsonProperty("metadata") Metadata metadata) {
         this.uuid = uuid;
         this.name = name;
@@ -71,6 +99,7 @@ public class Spell {
         this.additionalTags = additionalTags;
         this.castingDuration = castingDuration;
         this.timeUnit = timeUnit;
+        this.reactionCondition = reactionCondition;
         this.castingRange = castingRange;
         this.rangeUnit = rangeUnit;
         this.duration = duration;
@@ -81,7 +110,9 @@ public class Spell {
         this.materialComponent = materialComponent;
         this.materials = materials;
         this.classUUIDs = classUUIDs;
+        this.subclassUUIDs = subclassUUIDs;
         this.description = description;
+        this.upcastDescription = upcastDescription;
         this.metadata = metadata;
     }
 
@@ -90,6 +121,7 @@ public class Spell {
         return this.uuid;
     }
 
+    @BsonProperty("source_uuid")
     public UUID getSourceUUID() {
         return this.sourceUUID;
     }
@@ -99,6 +131,7 @@ public class Spell {
         return ElementRegistry.getInstance().getSourceByUUID(this.getSourceUUID());
     }
 
+    @BsonProperty("name")
     public String getName() {
         return this.name;
     }
@@ -107,6 +140,7 @@ public class Spell {
         this.name = name;
     }
 
+    @BsonProperty("level")
     public int getLevel() {
         return this.level;
     }
@@ -115,6 +149,7 @@ public class Spell {
         this.level = level;
     }
 
+    @BsonProperty("school_uuid")
     public UUID getSchoolUUID() {
         return this.schoolUUID;
     }
@@ -132,6 +167,7 @@ public class Spell {
         this.setSchoolUUID(school.getUUID());
     }
 
+    @BsonProperty("ritual")
     public boolean isRitual() {
         return this.ritual;
     }
@@ -140,6 +176,7 @@ public class Spell {
         this.ritual = ritual;
     }
 
+    @BsonProperty("additional_tags")
     public List<String> getAdditionalTags() {
         return this.additionalTags;
     }
@@ -152,6 +189,7 @@ public class Spell {
         this.getAdditionalTags().remove(tag);
     }
 
+    @BsonProperty("casting_duration")
     public int getCastingDuration() {
         return this.castingDuration;
     }
@@ -160,6 +198,7 @@ public class Spell {
         this.castingDuration = duration;
     }
 
+    @BsonProperty("casting_time_unit")
     public TimeUnit getCastingTimeUnit() {
         return this.timeUnit;
     }
@@ -168,6 +207,16 @@ public class Spell {
         this.timeUnit = timeUnit;
     }
 
+    @BsonProperty("reaction_condition")
+    public String getReactionCondition() {
+        return this.reactionCondition;
+    }
+
+    public void setReactionCondition(String reactionCondition) {
+        this.reactionCondition = reactionCondition;
+    }
+
+    @BsonProperty("casting_range")
     public int getCastingRange() {
         return this.castingRange;
     }
@@ -176,6 +225,7 @@ public class Spell {
         this.castingRange = range;
     }
 
+    @BsonProperty("casting_range_unit")
     public RangeUnit getCastingRangeUnit() {
         return this.rangeUnit;
     }
@@ -184,6 +234,7 @@ public class Spell {
         this.rangeUnit = rangeUnit;
     }
 
+    @BsonProperty("duration")
     public int getDuration() {
         return this.duration;
     }
@@ -192,6 +243,7 @@ public class Spell {
         this.duration = duration;
     }
 
+    @BsonProperty("duration_time_unit")
     public TimeUnit getDurationUnit() {
         return this.durationUnit;
     }
@@ -200,6 +252,7 @@ public class Spell {
         this.durationUnit = durationUnit;
     }
 
+    @BsonProperty("concentration")
     public boolean isConcentration() {
         return this.concentration;
     }
@@ -208,6 +261,7 @@ public class Spell {
         this.concentration = concentration;
     }
 
+    @BsonProperty("verbal_component")
     public boolean isVerbalComponent() {
         return this.verbalComponent;
     }
@@ -216,6 +270,7 @@ public class Spell {
         this.verbalComponent = verbalComponent;
     }
 
+    @BsonProperty("somatic_component")
     public boolean isSomaticComponent() {
         return this.somaticComponent;
     }
@@ -224,6 +279,7 @@ public class Spell {
         this.somaticComponent = somaticComponent;
     }
 
+    @BsonProperty("material_component")
     public boolean isMaterialComponent() {
         return this.materialComponent;
     }
@@ -232,6 +288,7 @@ public class Spell {
         this.materialComponent = materialComponent;
     }
 
+    @BsonProperty("materials")
     public String getMaterials() {
         return this.materials;
     }
@@ -240,6 +297,7 @@ public class Spell {
         this.materials = materials;
     }
 
+    @BsonProperty("class_uuids")
     public List<UUID> getClassUUIDs() {
         return this.classUUIDs;
     }
@@ -269,6 +327,37 @@ public class Spell {
         this.getClassUUIDs().remove(uuid);
     }
 
+    @BsonProperty("subclass_uuids")
+    public List<UUID> getSubclassUUIDs() {
+        return this.subclassUUIDs;
+    }
+
+    @BsonIgnore
+    public List<Subclass> getSubclasses() {
+        List<Subclass> subclasses = new ArrayList<>();
+        for (UUID uuid : this.getSubclassUUIDs()) {
+            subclasses.add(ElementRegistry.getInstance().getSubclassByUUID(uuid));
+        }
+        return subclasses;
+    }
+
+    public void addSubclass(Subclass subclass) {
+        this.addSubclass(subclass.getUUID());
+    }
+
+    public void addSubclass(UUID uuid) {
+        this.getSubclassUUIDs().add(uuid);
+    }
+
+    public void removeSubclass(Subclass subclass) {
+        this.removeSubclass(subclass.getUUID());
+    }
+
+    public void removeSubclass(UUID uuid) {
+        this.getSubclassUUIDs().remove(uuid);
+    }
+
+    @BsonProperty("description")
     public String getDescription() {
         return this.description;
     }
@@ -277,6 +366,16 @@ public class Spell {
         this.description = description;
     }
 
+    @BsonProperty("upcast_description")
+    public String getUpcastDescription() {
+        return this.upcastDescription;
+    }
+
+    public void setUpcastDescription(String upcastDescription) {
+        this.upcastDescription = upcastDescription;
+    }
+
+    @BsonProperty("metadata")
     public Metadata getMetadata() {
         return this.metadata;
     }

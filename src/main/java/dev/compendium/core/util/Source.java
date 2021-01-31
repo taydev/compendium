@@ -37,7 +37,7 @@ public class Source {
      */
     public Source(String name, String authorName, String discordID) {
         this(ElementRegistry.getInstance().createSourceUUID(), name, ElementUtils.abbreviate(name), authorName,
-            authorName, discordID, new ArrayList<>(Collections.singletonList(discordID)));
+            "", discordID, new ArrayList<>(Collections.singletonList(discordID)));
     }
 
     /**

@@ -7,6 +7,7 @@ import dev.compendium.core.character.component.Proficiency;
 import dev.compendium.core.item.Currency;
 import dev.compendium.core.item.Item;
 import java.awt.Color;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,8 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import org.bson.Document;
 
 // TODO: write documentation
@@ -184,7 +187,8 @@ public class ElementUtils {
         return result;
     }
 
-    public static EmbedBuilder createItemSummary(Item item) {
+    public static List<EmbedBuilder> createItemSummary(Item item) {
+        List<EmbedBuilder> builders = new ArrayList<>();
         EmbedBuilder result = new EmbedBuilder();
         result.setColor(randomColourGenerator());
         String title = item.getName();
@@ -212,20 +216,41 @@ public class ElementUtils {
             }
             result.addField("Weight", weight, true);
         }
+        StringBuilder descriptionBuilder = new StringBuilder();
+        if (item.getAdditionalTags().size() > 0) {
+            descriptionBuilder.append("(").append(String.join(", ", item.getAdditionalTags())).append(")\n");
+        }
         if (!item.getDescription().equals("")) {
-            String description = "";
-            if (item.getAdditionalTags().size() > 0) {
-                description = "(" + String.join(", ", item.getAdditionalTags()) + ")\n";
+            int embedLength = result.length() + descriptionBuilder.length();
+            if (embedLength + item.getDescription().length() >= 1800) {
+                String[] words = item.getDescription().split(" ");
+                for (String word : words) {
+                    if (descriptionBuilder.length() + word.length() >= 1800) {
+                        result.setDescription(descriptionBuilder.toString().trim());
+                        Color color = result.build().getColor();
+                        builders.add(result);
+                        result = new EmbedBuilder()
+                            .setColor(color);
+                        descriptionBuilder = new StringBuilder();
+                    }
+                    descriptionBuilder.append(word).append(" ");
+                }
+            } else {
+                result.setDescription(descriptionBuilder.append(item.getDescription()).toString().trim());
             }
-            description = description + item.getDescription();
-            result.setDescription(description);
         }
         result.setFooter("Item Source - " + item.getSource().getAbbreviation());
-        return result;
+        builders.add(result);
+        return builders;
+    }
+
+    public static void sendItemSummary(Item item, MessageChannel channel) {
+        multiMessage(channel, createItemSummary(item));
     }
 
     @SuppressWarnings("unchecked")
-    public static EmbedBuilder createBackgroundSummary(Background background) {
+    public static List<EmbedBuilder> createBackgroundSummary(Background background) {
+        List<EmbedBuilder> builders = new ArrayList<>();
         EmbedBuilder result = new EmbedBuilder();
         result.setColor(randomColourGenerator());
         // Background Name
@@ -382,10 +407,27 @@ public class ElementUtils {
         // Description
         result.addField("Description", background.getDescription(), false);
         for (Feature feature : background.getFeatures()) {
+            if (result.length() + feature.getName().length() + feature.getDescription().length() + 8 >= 1900) {
+                builders.add(result);
+                Color color = result.build().getColor();
+                result = new EmbedBuilder()
+                    .setColor(color);
+            }
             result.addField("Feature - " + feature.getName(), feature.getDescription(), false);
         }
         result.setFooter("Background Source - " + background.getSource().getAbbreviation());
-        return result;
+        builders.add(result);
+        return builders;
+    }
+
+    public static void sendBackgroundSummary(Background background, MessageChannel channel) {
+        multiMessage(channel, createBackgroundSummary(background));
+    }
+
+    private static void multiMessage(MessageChannel channel, List<EmbedBuilder> builders) {
+        for (EmbedBuilder builder : builders) {
+            channel.sendMessage(builder.build()).queue();
+        }
     }
 
     private static Color randomColourGenerator() {
@@ -422,5 +464,20 @@ public class ElementUtils {
             return intWeight + " 7/8";
         }
         return "";
+    }
+
+    public static String convertIntToLevelString(int level) {
+        String levelString = String.valueOf(level);
+        if (levelString.endsWith("11") || levelString.endsWith("12") || levelString.endsWith("13")) {
+            return level + "th";
+        } else if (levelString.endsWith("1")) {
+            return level + "st";
+        } else if (levelString.endsWith("2")) {
+            return level + "nd";
+        } else if (levelString.endsWith("3")) {
+            return level + "rd";
+        } else {
+            return level + "th";
+        }
     }
 }

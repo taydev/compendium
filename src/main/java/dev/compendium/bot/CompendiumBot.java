@@ -7,7 +7,9 @@ import com.google.gson.JsonParser;
 import dev.compendium.bot.commands.ICommand;
 import dev.compendium.bot.commands.creation.SessionCommand;
 import dev.compendium.bot.commands.developer.DebugViewCommand;
+import dev.compendium.bot.commands.developer.ParseSpellCommand;
 import dev.compendium.bot.commands.developer.ReloadCommand;
+import dev.compendium.bot.commands.dnd.MultiRollCommand;
 import dev.compendium.bot.commands.dnd.RollCommand;
 import dev.compendium.bot.commands.elements.BackgroundCommand;
 import dev.compendium.bot.commands.elements.ItemCommand;
@@ -148,8 +150,10 @@ public class CompendiumBot {
         this.registerCommand(new SessionCommand());
         //--
         this.registerCommand(new DebugViewCommand());
+        this.registerCommand(new ParseSpellCommand());
         this.registerCommand(new ReloadCommand());
         //--
+        this.registerCommand(new MultiRollCommand());
         this.registerCommand(new RollCommand());
         //--
         this.registerCommand(new BackgroundCommand());

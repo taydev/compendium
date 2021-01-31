@@ -123,7 +123,7 @@ public class ItemCommand extends ListenerAdapter implements ICommand {
     }
 
     private void processItem(Item item, MessageChannel channel) {
-        channel.sendMessage(ElementUtils.createItemSummary(item).build()).queue();
+        ElementUtils.sendItemSummary(item, channel);
     }
 
     private void initialiseWait(User sender, MessageChannel channel) {
