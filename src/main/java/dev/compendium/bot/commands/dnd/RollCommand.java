@@ -5,31 +5,15 @@ import dev.compendium.bot.commands.CommandCategory;
 import dev.compendium.bot.commands.ICommand;
 import dev.compendium.bot.utils.RollResults;
 import dev.compendium.bot.utils.RollUtils;
-import dev.compendium.core.util.ElementUtils;
-import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
-import net.dv8tion.jda.internal.utils.tuple.Pair;
-import uk.co.binaryoverload.dicerollparser.Parser;
-import uk.co.binaryoverload.dicerollparser.enums.Operator;
-import uk.co.binaryoverload.dicerollparser.objects.AddedValue;
-import uk.co.binaryoverload.dicerollparser.objects.DiceRoll;
-import uk.co.binaryoverload.dicerollparser.objects.Die;
-import uk.co.binaryoverload.dicerollparser.objects.Modifier;
 
 // have to suppress dupe code because intellij doesn't like my min/max methods
 // spaghetti ahead
@@ -88,7 +72,8 @@ public class RollCommand implements ICommand {
                     }
                 } catch (OutOfMemoryError e) {
                     channel.sendMessage("We ran out of memory :(").queue();
-                }}).start();
+                }
+            }).start();
         } else {
             sendErrorMessage(channel, "Invalid syntax: `" + CompendiumBot.getInstance().getPrefix()
                 + command + " (dice query) [roll name]");

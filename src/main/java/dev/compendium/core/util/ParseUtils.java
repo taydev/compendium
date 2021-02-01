@@ -2,13 +2,9 @@ package dev.compendium.core.util;
 
 import com.google.gson.JsonObject;
 import dev.compendium.core.ElementRegistry;
-import dev.compendium.core.item.Item;
 import dev.compendium.core.spell.Spell;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.MissingFormatWidthException;
-import javax.swing.text.Element;
 
 public class ParseUtils {
 

@@ -5,11 +5,11 @@ import uk.co.binaryoverload.dicerollparser.objects.DiceRoll;
 
 public class RollResults {
 
-    private Map<DiceRoll, Long> rollResults;
-    private Map<String, Long> labelledRolls;
-    private long totalRoll;
-    private double trueResult;
-    private StringBuilder rollString;
+    private final Map<DiceRoll, Long> rollResults;
+    private final Map<String, Long> labelledRolls;
+    private final long totalRoll;
+    private final double trueResult;
+    private final StringBuilder rollString;
 
     public RollResults(Map<DiceRoll, Long> rollResults, Map<String, Long> labelledRolls, long totalRoll, double trueResult,
         StringBuilder rollString) {

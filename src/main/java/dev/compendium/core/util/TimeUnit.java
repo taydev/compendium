@@ -14,13 +14,6 @@ public enum TimeUnit {
     MONTH,
     YEAR;
 
-    public String getName(int duration) {
-        if (duration < 1) {
-            return "Instantaneous";
-        }
-        return duration + " " + this.name().replaceAll("_", " ").toLowerCase() + (duration > 1 ? "s" : "");
-    }
-
     public static TimeUnit getTime(String input) {
         input = input.toLowerCase().replaceAll("[^a-z]", "");
         if (input.equalsIgnoreCase("instantaneous")) {
@@ -48,5 +41,12 @@ public enum TimeUnit {
         } else {
             return INSTANTANEOUS;
         }
+    }
+
+    public String getName(int duration) {
+        if (duration < 1) {
+            return "Instantaneous";
+        }
+        return duration + " " + this.name().replaceAll("_", " ").toLowerCase() + (duration > 1 ? "s" : "");
     }
 }

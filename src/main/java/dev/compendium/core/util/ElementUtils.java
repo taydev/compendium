@@ -7,7 +7,6 @@ import dev.compendium.core.character.component.Proficiency;
 import dev.compendium.core.item.Currency;
 import dev.compendium.core.item.Item;
 import java.awt.Color;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,6 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import org.bson.Document;
 

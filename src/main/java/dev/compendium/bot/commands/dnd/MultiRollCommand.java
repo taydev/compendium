@@ -43,7 +43,8 @@ public class MultiRollCommand implements ICommand {
         if (args.length >= 2) {
             new Thread(() -> {
                 try {
-                    List<RollResults> resultsList = RollUtils.processRoll(sender, message, channel, command, args[1], Long.parseLong(args[0]));
+                    List<RollResults> resultsList = RollUtils
+                        .processRoll(sender, message, channel, command, args[1], Long.parseLong(args[0]));
                     Map<String, Long> totalLabelledRolls = new HashMap<>();
                     long totalRoll = 0;
                     if (resultsList != null) {
