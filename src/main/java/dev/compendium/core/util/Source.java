@@ -21,6 +21,8 @@ public class Source {
     private final String ownerID;
     @BsonProperty("discord_ids")
     private final List<String> discordIDs;
+    @BsonProperty("alternative_abbreviations")
+    private final List<String> alternativeAbbreviations;
     private String name;
     private String abbreviation;
     @BsonProperty("author_name")
@@ -37,7 +39,7 @@ public class Source {
      */
     public Source(String name, String authorName, String discordID) {
         this(ElementRegistry.getInstance().createSourceUUID(), name, ElementUtils.abbreviate(name), authorName,
-            "", discordID, new ArrayList<>(Collections.singletonList(discordID)));
+            new ArrayList<>(), "", discordID, new ArrayList<>(Collections.singletonList(discordID)));
     }
 
     /**
@@ -54,11 +56,13 @@ public class Source {
     @BsonCreator
     public Source(@BsonId UUID uuid, @BsonProperty("name") String name,
         @BsonProperty("abbreviation") String abbreviation, @BsonProperty("author_name") String authorName,
+        @BsonProperty("alternative_abbreviations") List<String> alternativeAbbreviations,
         @BsonProperty("author_url") String authorUrl, @BsonProperty("owner_id") String ownerID,
         @BsonProperty("discord_ids") List<String> discordIDs) {
         this.uuid = uuid;
         this.name = name;
         this.abbreviation = abbreviation;
+        this.alternativeAbbreviations = alternativeAbbreviations;
         this.authorName = authorName;
         this.authorUrl = authorUrl;
         this.ownerID = ownerID;
@@ -217,5 +221,18 @@ public class Source {
      */
     public boolean isMember(String discordID) {
         return this.getDiscordIDs().contains(discordID);
+    }
+
+    @BsonProperty("alternative_abbreviations")
+    public List<String> getAlternativeAbbreviations() {
+        return alternativeAbbreviations;
+    }
+
+    public void addAlternativeAbbreviation(String abbreviation) {
+        this.getAlternativeAbbreviations().add(abbreviation);
+    }
+
+    public void removeAlternativeAbbreviation(String abbreviation) {
+        this.getAlternativeAbbreviations().remove(abbreviation);
     }
 }

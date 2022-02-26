@@ -1,11 +1,9 @@
 package dev.compendium.bot.commands.developer;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import dev.compendium.bot.commands.CommandCategory;
 import dev.compendium.bot.commands.ICommand;
+import dev.compendium.core.spell.Spell;
 import dev.compendium.core.util.ParseUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -42,18 +40,16 @@ public class ParseSpellCommand implements ICommand {
                 File file = attachment.downloadToFile().get();
                 channel.sendMessage("parsing file").queue();
                 FileReader fr = new FileReader(file);
-                JsonArray spells = (JsonArray) JsonParser.parseReader(fr);
-                channel.sendMessage("first 100 chars: " + spells.toString().substring(0, 100)).queue();
-                long time = System.currentTimeMillis();
-                channel.sendMessage("parsing items").queue();
-                int parsed = 0;
-                for (JsonElement spell : spells) {
-                    JsonObject jsonObject = (JsonObject) spell;
-                    ParseUtils.parseSpell(jsonObject);
-                    parsed++;
+                JsonObject spellJson = (JsonObject) JsonParser.parseReader(fr);
+                channel.sendMessage("parsing item").queue();
+                Spell spell = new Spell(spellJson);
+                Gson gson = new GsonBuilder().create();
+                channel.sendMessage("done?").queue();
+                String spellContents = gson.toJson(spell);
+                if (spellContents.length() > 2000) {
+                    spellContents = spellContents.substring(0, 2000);
                 }
-                channel.sendMessage("parsed " + parsed + " spells from " + spells.size() + " objects in "
-                    + (System.currentTimeMillis() - time) + "ms").queue();
+                channel.sendMessage(spellContents).queue();
             } catch (InterruptedException | ExecutionException ignored) {
                 channel.sendMessage("download fucked").queue();
             } catch (FileNotFoundException e) {

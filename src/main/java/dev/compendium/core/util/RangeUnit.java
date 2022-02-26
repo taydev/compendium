@@ -3,6 +3,7 @@ package dev.compendium.core.util;
 // TODO: does this even need documentation either?
 public enum RangeUnit {
     TOUCH,
+    SELF,
     FOOT,
     MILE;
 
@@ -11,6 +12,8 @@ public enum RangeUnit {
             return FOOT;
         } else if (rangeLabel.toLowerCase().contains("mile")) {
             return MILE;
+        } else if (rangeLabel.toLowerCase().contains("self")) {
+            return SELF;
         } else {
             return TOUCH;
         }

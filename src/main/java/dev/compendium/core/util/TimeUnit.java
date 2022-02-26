@@ -16,11 +16,11 @@ public enum TimeUnit {
 
     public static TimeUnit getTime(String input) {
         input = input.toLowerCase().replaceAll("[^a-z]", "");
-        if (input.equalsIgnoreCase("instantaneous")) {
+        if (input.equalsIgnoreCase("instant")) {
             return INSTANTANEOUS;
         } else if (input.contains("reaction")) {
             return REACTION;
-        } else if (input.contains("bonus action")) {
+        } else if (input.contains("bonus")) {
             return BONUS_ACTION;
         } else if (input.contains("action")) {
             return ACTION;

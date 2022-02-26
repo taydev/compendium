@@ -74,6 +74,10 @@ public class ElementRegistry {
         this.client.close();
         instance = null;
     }
+
+    public static Logger getLogger() {
+        return LOGGER;
+    }
     //endregion
 
     //region Alignment Functions

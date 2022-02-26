@@ -1,382 +1,381 @@
 package dev.compendium.core.spell;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import dev.compendium.bot.CompendiumBot;
 import dev.compendium.core.ElementRegistry;
 import dev.compendium.core.character.component.CharacterClass;
 import dev.compendium.core.character.component.Subclass;
-import dev.compendium.core.util.Metadata;
-import dev.compendium.core.util.RangeUnit;
-import dev.compendium.core.util.Source;
-import dev.compendium.core.util.TimeUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import dev.compendium.core.util.*;
+
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import dev.compendium.core.util.entry.*;
 import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
-// TODO: write documentation
+// TODO: literally everything
 public class Spell {
 
-    @BsonId
-    private final UUID uuid;
-    @BsonProperty("source_uuid")
-    private final UUID sourceUUID;
-    @BsonProperty("additional_tags")
-    private final List<String> additionalTags;
-    @BsonProperty("class_uuids")
-    private final List<UUID> classUUIDs;
-    @BsonProperty("subclass_uuids")
-    private final List<UUID> subclassUUIDs;
-    @BsonProperty("metadata")
-    private final Metadata metadata;
-    @BsonProperty("name")
+    private UUID uuid;
     private String name;
-    @BsonProperty("level")
+    private String source;
+    private int sourcePage;
+    private boolean SRD;
     private int level;
-    @BsonProperty("school_uuid")
-    private UUID schoolUUID;
-    @BsonProperty("ritual")
-    private boolean ritual;
-    @BsonProperty("casting_duration")
-    private int castingDuration;
-    @BsonProperty("casting_time_unit")
+    private String school;
+    private int time;
     private TimeUnit timeUnit;
-    @BsonProperty("reaction_condition")
-    private String reactionCondition;
-    @BsonProperty("casting_range")
-    private int castingRange;
-    @BsonProperty("casting_range_unit")
-    private RangeUnit rangeUnit;
-    @BsonProperty("duration")
+    private String rangeType;
+    private int distance;
+    private RangeUnit distanceType;
+    private boolean verbal;
+    private boolean somatic;
+    private String material;
+    private boolean ritual;
+    private boolean timed;
     private int duration;
-    @BsonProperty("duration_time_unit")
     private TimeUnit durationUnit;
-    @BsonProperty("concentration")
     private boolean concentration;
-    @BsonProperty("verbal_component")
-    private boolean verbalComponent;
-    @BsonProperty("somatic_component")
-    private boolean somaticComponent;
-    @BsonProperty("material_component")
-    private boolean materialComponent;
-    @BsonProperty("materials")
-    private String materials;
-    @BsonProperty("description")
-    private String description;
-    @BsonProperty("upcast_description")
-    private String upcastDescription;
+    private List<Entry> entries;
+    private List<Entry> entriesHigherLevel;
+    private String scalingDamageType;
+    private Map<Integer, String> scalingDamageDice;
+    private List<String> tags;
+    private List<ArchetypeEntry> classes;
+    private List<SubArchetypeEntry> subclasses;
+    private List<VariantArchetypeEntry> variants;
+    private List<BaseArchetypeEntry> races;
+    private List<ArchetypeEntry> backgrounds;
+    private List<ArchetypeEntry> eldritchInvocations;
 
-    public Spell(Source source, String name) {
-        this(source.getUUID(), name);
+    //region 5e.tools format
+    // THIS IS JUST HERE FOR THE SAKE OF AUTO-IMPORTING
+    public Spell(JsonObject obj) {
+        this.uuid = ElementRegistry.getInstance().createSpellUUID();
+        this.name = obj.get("name").getAsString();
+        this.source = obj.get("source").getAsString();
+        this.sourcePage = obj.get("page").getAsInt();
+        this.SRD = obj.get("srd").getAsBoolean();
+        this.level = obj.get("level").getAsInt();
+        this.school = obj.get("school").getAsString();
+        JsonObject timeObject = obj.get("time").getAsJsonArray().get(0).getAsJsonObject();
+        this.timeUnit = TimeUnit.getTime(timeObject.get("unit").getAsString());
+        this.time = timeObject.get("number").getAsInt();
+        JsonObject rangeObject = obj.get("range").getAsJsonObject();
+        this.rangeType = rangeObject.get("type").getAsString();
+        JsonObject distanceObject = rangeObject.get("distance").getAsJsonObject();
+        this.distanceType = RangeUnit.getRange(distanceObject.get("type").getAsString());
+        if (this.distanceType == RangeUnit.TOUCH) {
+            this.distance = -1;
+        } else {
+            this.distance = distanceObject.get("amount").getAsInt();
+        }
+        JsonObject componentsObject = obj.get("components").getAsJsonObject();
+        this.verbal = componentsObject.has("v");
+        this.somatic = componentsObject.has("s");
+        if (componentsObject.has("m")) {
+            this.material = componentsObject.get("m").getAsString();
+        } else {
+            this.material = "";
+        }
+        if (obj.has("meta")) {
+            JsonObject metaObject = obj.get("meta").getAsJsonObject();
+            this.ritual = metaObject.has("ritual");
+        } else {
+            this.ritual = false;
+        }
+        JsonObject durationObject = obj.get("duration").getAsJsonArray().get(0).getAsJsonObject();
+        this.timed = durationObject.get("type").getAsString().equalsIgnoreCase("timed");
+        if (this.timed) {
+            JsonObject innerDurationObject = durationObject.get("duration").getAsJsonObject();
+            this.durationUnit = TimeUnit.getTime(innerDurationObject.get("type").getAsString());
+            this.duration = innerDurationObject.get("amount").getAsInt();
+            this.concentration = durationObject.has("concentration");
+        } else {
+            this.durationUnit = TimeUnit.INSTANTANEOUS;
+            this.duration = -1;
+            this.concentration = false;
+        }
+        JsonArray entries = obj.get("entries").getAsJsonArray();
+        this.entries = ParseUtils.parseEntries(entries);
+        if (obj.has("entriesHigherLevel")) {
+            JsonArray entriesHigherLevel = obj.get("entriesHigherLevel").getAsJsonArray();
+            this.entriesHigherLevel = ParseUtils.parseEntries(entriesHigherLevel);
+        } else {
+            this.entriesHigherLevel = new ArrayList<>();
+        }
+        if (obj.has("scalingLevelDice")) {
+            JsonObject scalingLevelDice = obj.get("scalingLevelDice").getAsJsonObject();
+            this.scalingDamageType = scalingLevelDice.get("label").getAsString();
+            JsonObject scalingDamage = scalingLevelDice.get("scaling").getAsJsonObject();
+            this.scalingDamageDice = new HashMap<>();
+            for (Map.Entry<String, JsonElement> scalingDamageEntry : scalingDamage.entrySet()) {
+                scalingDamageDice.put(
+                        Integer.parseInt(scalingDamageEntry.getKey()),
+                        scalingDamageEntry.getValue().getAsString()
+                );
+            }
+        }
+        this.tags = new ArrayList<>();
+        if (obj.has("damageInflict")) {
+            JsonArray damageInflictArray = obj.get("damageInflict").getAsJsonArray();
+            for (JsonElement damageInflictElement : damageInflictArray) {
+                this.tags.add(damageInflictElement.getAsString());
+            }
+        }
+        if (obj.has("savingThrow")) {
+            JsonArray savingThrowArray = obj.get("savingThrow").getAsJsonArray();
+            for (JsonElement savingThrowElement : savingThrowArray) {
+                this.tags.add(savingThrowElement.getAsString());
+            }
+        }
+        if (obj.has("conditionInflict")) {
+            JsonArray conditionInflictArray = obj.get("conditionInflict").getAsJsonArray();
+            for (JsonElement conditionInflictElement : conditionInflictArray) {
+                this.tags.add(conditionInflictElement.getAsString());
+            }
+        }
+        if (obj.has("abilityCheck")) {
+            JsonArray abilityCheckArray = obj.get("abilityCheck").getAsJsonArray();
+            for (JsonElement abilityCheckElement : abilityCheckArray) {
+                this.tags.add(abilityCheckElement.getAsString());
+            }
+        }
+        if (obj.has("spellAttack")) {
+            JsonArray spellAttackArray = obj.get("spellAttack").getAsJsonArray();
+            for (JsonElement spellAttackElement : spellAttackArray) {
+                this.tags.add(spellAttackElement.getAsString());
+            }
+        }
+        if (obj.has("miscTags")) {
+            JsonArray miscTagsArray = obj.get("miscTags").getAsJsonArray();
+            for (JsonElement miscTagsElement : miscTagsArray) {
+                this.tags.add(miscTagsElement.getAsString());
+            }
+        }
+        if (obj.has("areaTags")) {
+            JsonArray areaTagsArray = obj.get("areaTags").getAsJsonArray();
+            for (JsonElement areaTagsElement : areaTagsArray) {
+                this.tags.add(areaTagsElement.getAsString());
+            }
+        }
+        JsonObject classesObj = obj.get("classes").getAsJsonObject();
+        if (classesObj.has("fromClassList")) {
+            this.classes = new ArrayList<>();
+            JsonArray fromClassListArray = classesObj.get("fromClassList").getAsJsonArray();
+            for (JsonElement classElement : fromClassListArray) {
+                JsonObject classListEntryObj = classElement.getAsJsonObject();
+                ArchetypeEntry archetypeEntry = new ArchetypeEntry(
+                        classListEntryObj.get("name").getAsString(),
+                        classListEntryObj.get("source").getAsString()
+                );
+                this.classes.add(archetypeEntry);
+            }
+        }
+        if (classesObj.has("fromSubclass")) {
+            this.subclasses = new ArrayList<>();
+            JsonArray fromSubclassArray = classesObj.get("fromSubclass").getAsJsonArray();
+            for (JsonElement subclassElement : fromSubclassArray) {
+                JsonObject fromSubclassEntryObj = subclassElement.getAsJsonObject();
+                JsonObject innerClassObj = fromSubclassEntryObj.get("class").getAsJsonObject();
+                JsonObject innerSubclassObj = fromSubclassEntryObj.get("subclass").getAsJsonObject();
+                SubArchetypeEntry subArchetypeEntry = new SubArchetypeEntry(
+                        innerClassObj.get("name").getAsString(),
+                        innerClassObj.get("source").getAsString(),
+                        innerSubclassObj.get("name").getAsString(),
+                        innerSubclassObj.get("source").getAsString()
+                );
+                if (innerSubclassObj.has("subSubclass")) {
+                    subArchetypeEntry.setSubSubArchetypeName(innerSubclassObj.get("subSubclass").getAsString());
+                }
+                this.subclasses.add(subArchetypeEntry);
+            }
+        }
+        if (classesObj.has("fromClassListVariant")) {
+            this.variants = new ArrayList<>();
+            JsonArray fromClassListVariantArray = classesObj.get("fromClassListVariant").getAsJsonArray();
+            for (JsonElement classListVariantElement : fromClassListVariantArray) {
+                JsonObject classListVariantObj = classListVariantElement.getAsJsonObject();
+                VariantArchetypeEntry variantArchetypeEntry = new VariantArchetypeEntry(
+                        classListVariantObj.get("name").getAsString(),
+                        classListVariantObj.get("source").getAsString(),
+                        classListVariantObj.get("definedInSource").getAsString()
+                );
+                this.variants.add(variantArchetypeEntry);
+            }
+        }
+        if (obj.has("races")) {
+            this.races = new ArrayList<>();
+            JsonArray racesArray = obj.get("races").getAsJsonArray();
+            for (JsonElement raceElement : racesArray) {
+                JsonObject raceObj = raceElement.getAsJsonObject();
+                BaseArchetypeEntry baseArchetypeEntry = new BaseArchetypeEntry(
+                        raceObj.get("name").getAsString(),
+                        raceObj.get("source").getAsString(),
+                        raceObj.get("baseName").getAsString(),
+                        raceObj.get("baseSource").getAsString()
+                );
+                this.races.add(baseArchetypeEntry);
+            }
+        }
+        if (obj.has("backgrounds")) {
+            this.backgrounds = new ArrayList<>();
+            JsonArray backgroundArray = obj.get("backgrounds").getAsJsonArray();
+            for (JsonElement backgroundElement : backgroundArray) {
+                JsonObject backgroundObj = backgroundElement.getAsJsonObject();
+                ArchetypeEntry archetypeEntry = new ArchetypeEntry(
+                        backgroundObj.get("name").getAsString(),
+                        backgroundObj.get("source").getAsString()
+                );
+                this.backgrounds.add(archetypeEntry);
+            }
+        }
+        if (obj.has("eldritchInvocations")) {
+            this.eldritchInvocations = new ArrayList<>();
+            JsonArray eldritchInvocationArray = obj.get("eldritchInvocations").getAsJsonArray();
+            for (JsonElement eldritchInvocationElement : eldritchInvocationArray) {
+                JsonObject eldritchInvocationObj = eldritchInvocationElement.getAsJsonObject();
+                ArchetypeEntry archetypeEntry = new ArchetypeEntry(
+                        eldritchInvocationObj.get("name").getAsString(),
+                        eldritchInvocationObj.get("source").getAsString()
+                );
+                this.eldritchInvocations.add(archetypeEntry);
+            }
+        }
     }
+    // fucking hell this method hurts my soul ,w,
 
-    public Spell(UUID sourceUUID, String name) {
-        this(ElementRegistry.getInstance().createSpellUUID(), sourceUUID, name, 0, UUID.randomUUID(), false,
-            new ArrayList<>(), 1, TimeUnit.ACTION, "", 30, RangeUnit.FOOT, 0, TimeUnit.ACTION, false, false, false, false,
-            "", new ArrayList<>(), new ArrayList<>(), "", "", new Metadata());
-    }
-
-    @BsonCreator
-    public Spell(@BsonId UUID uuid, @BsonProperty("source_uuid") UUID sourceUUID, @BsonProperty("name") String name,
-        @BsonProperty("level") int level, @BsonProperty("school_uuid") UUID schoolUUID,
-        @BsonProperty("ritual") boolean ritual, @BsonProperty("additional_tags") List<String> additionalTags,
-        @BsonProperty("casting_duration") int castingDuration, @BsonProperty("casting_time_unit") TimeUnit timeUnit,
-        @BsonProperty("reaction_condition") String reactionCondition, @BsonProperty("casting_range") int castingRange,
-        @BsonProperty("casting_range_unit") RangeUnit rangeUnit, @BsonProperty("duration") int duration,
-        @BsonProperty("duration_time_unit") TimeUnit durationUnit, @BsonProperty("concentration") boolean concentration,
-        @BsonProperty("verbal_component") boolean verbalComponent, @BsonProperty("somatic_component") boolean somaticComponent,
-        @BsonProperty("material_component") boolean materialComponent, @BsonProperty("materials") String materials,
-        @BsonProperty("class_uuids") List<UUID> classUUIDs, @BsonProperty("subclass_uuids") List<UUID> subclassUUIDs,
-        @BsonProperty("description") String description, @BsonProperty("upcast_description") String upcastDescription,
-        @BsonProperty("metadata") Metadata metadata) {
-        this.uuid = uuid;
-        this.name = name;
-        this.sourceUUID = sourceUUID;
-        this.level = level;
-        this.schoolUUID = schoolUUID;
-        this.ritual = ritual;
-        this.additionalTags = additionalTags;
-        this.castingDuration = castingDuration;
-        this.timeUnit = timeUnit;
-        this.reactionCondition = reactionCondition;
-        this.castingRange = castingRange;
-        this.rangeUnit = rangeUnit;
-        this.duration = duration;
-        this.durationUnit = durationUnit;
-        this.concentration = concentration;
-        this.verbalComponent = verbalComponent;
-        this.somaticComponent = somaticComponent;
-        this.materialComponent = materialComponent;
-        this.materials = materials;
-        this.classUUIDs = classUUIDs;
-        this.subclassUUIDs = subclassUUIDs;
-        this.description = description;
-        this.upcastDescription = upcastDescription;
-        this.metadata = metadata;
-    }
-
-    @BsonId
     public UUID getUUID() {
         return this.uuid;
     }
 
-    @BsonProperty("source_uuid")
-    public UUID getSourceUUID() {
-        return this.sourceUUID;
-    }
-
-    @BsonIgnore
-    public Source getSource() {
-        return ElementRegistry.getInstance().getSourceByUUID(this.getSourceUUID());
-    }
-
-    @BsonProperty("name")
     public String getName() {
         return this.name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getSource() {
+        return this.source;
     }
 
-    @BsonProperty("level")
+    public int getSourcePage() {
+        return this.sourcePage;
+    }
+
+    public boolean isInSRD() {
+        return this.SRD;
+    }
+
     public int getLevel() {
         return this.level;
     }
 
-    public void setLevel(int level) {
-        this.level = level;
+    public String getSchool() {
+        return this.school;
     }
 
-    @BsonProperty("school_uuid")
-    public UUID getSchoolUUID() {
-        return this.schoolUUID;
+    public int getCastingTime() {
+        return this.time;
     }
 
-    public void setSchoolUUID(UUID schoolUUID) {
-        this.schoolUUID = schoolUUID;
-    }
-
-    @BsonIgnore
-    public MagicSchool getSchool() {
-        return ElementRegistry.getInstance().getMagicSchoolByUUID(this.getSchoolUUID());
-    }
-
-    public void setSchool(MagicSchool school) {
-        this.setSchoolUUID(school.getUUID());
-    }
-
-    @BsonProperty("ritual")
-    public boolean isRitual() {
-        return this.ritual;
-    }
-
-    public void setRitual(boolean ritual) {
-        this.ritual = ritual;
-    }
-
-    @BsonProperty("additional_tags")
-    public List<String> getAdditionalTags() {
-        return this.additionalTags;
-    }
-
-    public void addTag(String tag) {
-        this.getAdditionalTags().add(tag);
-    }
-
-    public void removeTag(String tag) {
-        this.getAdditionalTags().remove(tag);
-    }
-
-    @BsonProperty("casting_duration")
-    public int getCastingDuration() {
-        return this.castingDuration;
-    }
-
-    public void setCastingDuration(int duration) {
-        this.castingDuration = duration;
-    }
-
-    @BsonProperty("casting_time_unit")
     public TimeUnit getCastingTimeUnit() {
         return this.timeUnit;
     }
 
-    public void setCastingTimeUnit(TimeUnit timeUnit) {
-        this.timeUnit = timeUnit;
+    public String getRangeType() {
+        return this.rangeType;
     }
 
-    @BsonProperty("reaction_condition")
-    public String getReactionCondition() {
-        return this.reactionCondition;
+    public RangeUnit getDistanceType() {
+        return this.distanceType;
     }
 
-    public void setReactionCondition(String reactionCondition) {
-        this.reactionCondition = reactionCondition;
+    public int getDistance() {
+        return this.distance;
     }
 
-    @BsonProperty("casting_range")
-    public int getCastingRange() {
-        return this.castingRange;
+    public boolean hasVerbal() {
+        return this.verbal;
     }
 
-    public void setCastingRange(int range) {
-        this.castingRange = range;
+    public boolean hasSomatic() {
+        return this.somatic;
     }
 
-    @BsonProperty("casting_range_unit")
-    public RangeUnit getCastingRangeUnit() {
-        return this.rangeUnit;
+    public boolean hasMaterial() {
+        return !this.material.equals("");
     }
 
-    public void setCastingRangeUnit(RangeUnit rangeUnit) {
-        this.rangeUnit = rangeUnit;
+    public String getMaterial() {
+        return this.material;
     }
 
-    @BsonProperty("duration")
-    public int getDuration() {
-        return this.duration;
+    public boolean isRitual() {
+        return this.ritual;
     }
 
-    public void setDuration(int duration) {
-        this.duration = duration;
+    public boolean isTimed() {
+        return this.timed;
     }
 
-    @BsonProperty("duration_time_unit")
     public TimeUnit getDurationUnit() {
         return this.durationUnit;
     }
 
-    public void setDurationUnit(TimeUnit durationUnit) {
-        this.durationUnit = durationUnit;
+    public int getDuration() {
+        return this.duration;
     }
 
-    @BsonProperty("concentration")
     public boolean isConcentration() {
         return this.concentration;
     }
 
-    public void setConcentration(boolean concentration) {
-        this.concentration = concentration;
+    public List<Entry> getEntries() {
+        return this.entries;
     }
 
-    @BsonProperty("verbal_component")
-    public boolean isVerbalComponent() {
-        return this.verbalComponent;
+    public List<Entry> getEntriesHigherLevel() {
+        return this.entriesHigherLevel;
     }
 
-    public void setVerbalComponent(boolean verbalComponent) {
-        this.verbalComponent = verbalComponent;
+    public String getScalingDamageType() {
+        return this.scalingDamageType;
     }
 
-    @BsonProperty("somatic_component")
-    public boolean isSomaticComponent() {
-        return this.somaticComponent;
+    public Map<Integer, String> getScalingDamageDice() {
+        return this.scalingDamageDice;
     }
 
-    public void setSomaticComponent(boolean somaticComponent) {
-        this.somaticComponent = somaticComponent;
+    public List<String> getTags() {
+        return this.tags;
     }
 
-    @BsonProperty("material_component")
-    public boolean isMaterialComponent() {
-        return this.materialComponent;
+    public List<ArchetypeEntry> getClasses() {
+        return this.classes;
     }
 
-    public void setMaterialComponent(boolean materialComponent) {
-        this.materialComponent = materialComponent;
+    public List<SubArchetypeEntry> getSubclasses() {
+        return this.subclasses;
     }
 
-    @BsonProperty("materials")
-    public String getMaterials() {
-        return this.materials;
+    public List<VariantArchetypeEntry> getVariants() {
+        return this.variants;
     }
 
-    public void setMaterials(String materials) {
-        this.materials = materials;
+    public List<ArchetypeEntry> getBackgrounds() {
+        return this.backgrounds;
     }
 
-    @BsonProperty("class_uuids")
-    public List<UUID> getClassUUIDs() {
-        return this.classUUIDs;
+    public List<BaseArchetypeEntry> getRaces() {
+        return this.races;
     }
 
-    @BsonIgnore
-    public List<CharacterClass> getClasses() {
-        List<CharacterClass> classes = new ArrayList<>();
-        for (UUID uuid : this.getClassUUIDs()) {
-            classes.add(ElementRegistry.getInstance().getClassByUUID(uuid));
-        }
-        return classes;
+    public List<ArchetypeEntry> getEldritchInvocations() {
+        return this.eldritchInvocations;
     }
-
-    public void addClass(CharacterClass characterClass) {
-        this.addClass(characterClass.getUUID());
-    }
-
-    public void addClass(UUID uuid) {
-        this.getClassUUIDs().add(uuid);
-    }
-
-    public void removeClass(CharacterClass characterClass) {
-        this.removeClass(characterClass.getUUID());
-    }
-
-    public void removeClass(UUID uuid) {
-        this.getClassUUIDs().remove(uuid);
-    }
-
-    @BsonProperty("subclass_uuids")
-    public List<UUID> getSubclassUUIDs() {
-        return this.subclassUUIDs;
-    }
-
-    @BsonIgnore
-    public List<Subclass> getSubclasses() {
-        List<Subclass> subclasses = new ArrayList<>();
-        for (UUID uuid : this.getSubclassUUIDs()) {
-            subclasses.add(ElementRegistry.getInstance().getSubclassByUUID(uuid));
-        }
-        return subclasses;
-    }
-
-    public void addSubclass(Subclass subclass) {
-        this.addSubclass(subclass.getUUID());
-    }
-
-    public void addSubclass(UUID uuid) {
-        this.getSubclassUUIDs().add(uuid);
-    }
-
-    public void removeSubclass(Subclass subclass) {
-        this.removeSubclass(subclass.getUUID());
-    }
-
-    public void removeSubclass(UUID uuid) {
-        this.getSubclassUUIDs().remove(uuid);
-    }
-
-    @BsonProperty("description")
-    public String getDescription() {
-        return this.description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    @BsonProperty("upcast_description")
-    public String getUpcastDescription() {
-        return this.upcastDescription;
-    }
-
-    public void setUpcastDescription(String upcastDescription) {
-        this.upcastDescription = upcastDescription;
-    }
-
-    @BsonProperty("metadata")
-    public Metadata getMetadata() {
-        return this.metadata;
-    }
+    //endregion
 }

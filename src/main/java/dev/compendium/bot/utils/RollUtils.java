@@ -1,9 +1,11 @@
 package dev.compendium.bot.utils;
 
+import dev.compendium.bot.CompendiumBot;
 import dev.compendium.core.util.ElementUtils;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,22 @@ public class RollUtils {
 
     public static List<RollResults> processRoll(User sender, Message message, MessageChannel channel, String command,
         String rollString, long iterations) {
+        //region bullshit
+        boolean cursed = false;
+        boolean blessed = false;
+        if (CompendiumBot.getInstance().isCurseRoll()) {
+            cursed = true;
+            CompendiumBot.getInstance().setCurseRoll(false);
+        }
+        if (CompendiumBot.getInstance().isBlessRoll()) {
+            blessed = true;
+            CompendiumBot.getInstance().setBlessRoll(false);
+        }
+        if (cursed && blessed) {
+            cursed = false;
+            blessed = false;
+        }
+        //endregion
         List<DiceRoll> rolls = Parser.parseDiceRoll(rollString);
         StringBuilder parsedSection = new StringBuilder();
         for (DiceRoll roll : rolls) {
@@ -38,7 +56,7 @@ public class RollUtils {
         for (int i = 0; i < iterations; i++) {
             StringBuilder sb = new StringBuilder();
             if (rolls.size() > 0) {
-                Map<DiceRoll, Map<Die, List<Long>>> finalDiceRolls = rollDice(rolls, channel);
+                Map<DiceRoll, Map<Die, List<Long>>> finalDiceRolls = rollDice(rolls, channel, blessed, cursed);
                 if (finalDiceRolls == null) {
                     return null;
                 }
@@ -47,14 +65,14 @@ public class RollUtils {
             } else {
                 double eval = ElementUtils.eval(rollString);
                 sb.append(rollString);
-                RollResults res = new RollResults(null, null, (long) Math.floor(eval), eval, sb);
+                RollResults res = new RollResults(new HashMap<>(), new HashMap<>(), (long) Math.floor(eval), eval, sb);
                 results.add(res);
             }
         }
         return results;
     }
 
-    private static Map<DiceRoll, Map<Die, List<Long>>> rollDice(List<DiceRoll> rolls, MessageChannel channel) {
+    private static Map<DiceRoll, Map<Die, List<Long>>> rollDice(List<DiceRoll> rolls, MessageChannel channel, boolean blessed, boolean cursed) {
         Map<DiceRoll, Map<Die, List<Long>>> finalRollValues = new LinkedHashMap<>();
         for (DiceRoll roll : rolls) {
             Map<Die, List<Long>> diceRollValues = new LinkedHashMap<>();
@@ -66,7 +84,14 @@ public class RollUtils {
                     break;
                 }
                 for (int i = 0; i < die.getDiceCount(); i++) {
-                    long rollValue = ThreadLocalRandom.current().nextLong(1, die.getDiceValue() + 1);
+                    long rollValue;
+                    if (blessed) {
+                        rollValue = ThreadLocalRandom.current().nextLong((long) Math.ceil(die.getDiceValue() / 2.0), die.getDiceValue() + 1);
+                    } else if (cursed) {
+                        rollValue = ThreadLocalRandom.current().nextLong(1, (long) Math.floor(die.getDiceValue() / 2.0));
+                    } else {
+                        rollValue = ThreadLocalRandom.current().nextLong(1, die.getDiceValue() + 1);
+                    }
                     rollValues.add(rollValue);
                 }
                 diceRollValues.put(die, rollValues);
@@ -154,7 +179,7 @@ public class RollUtils {
                         finalRoll /= addedValue.getValue();
                         break;
                 }
-                int value = addedValue.getValue().intValue();
+                int value = addedValue.getValue();
                 if (value == addedValue.getValue()) {
                     sb.append(value);
                 } else {
@@ -282,7 +307,7 @@ public class RollUtils {
                     sb.append("/");
                     break;
             }
-            int value = addedValue.getValue().intValue();
+            int value = addedValue.getValue();
             if (value == addedValue.getValue()) {
                 sb.append(value);
             } else {

@@ -6,9 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.compendium.bot.commands.ICommand;
 import dev.compendium.bot.commands.creation.SessionCommand;
-import dev.compendium.bot.commands.developer.DebugViewCommand;
-import dev.compendium.bot.commands.developer.ParseSpellCommand;
-import dev.compendium.bot.commands.developer.ReloadCommand;
+import dev.compendium.bot.commands.developer.*;
 import dev.compendium.bot.commands.dnd.MultiRollCommand;
 import dev.compendium.bot.commands.dnd.RollCommand;
 import dev.compendium.bot.commands.elements.BackgroundCommand;
@@ -40,6 +38,9 @@ public class CompendiumBot {
     private JDA client;
 
     private Set<ICommand> commands;
+
+    private boolean curseRoll;
+    private boolean blessRoll;
 
     public static void main(String[] args) {
         instance = new CompendiumBot();
@@ -131,6 +132,8 @@ public class CompendiumBot {
         LOGGER.info("Commands registered. Initialising element registry...");
         ElementRegistry.getInstance();
         LOGGER.info("Element registry initialised. Happy adventuring!");
+        this.setBlessRoll(false);
+        this.setCurseRoll(false);
     }
     //endregion
 
@@ -149,6 +152,8 @@ public class CompendiumBot {
         //--
         this.registerCommand(new SessionCommand());
         //--
+        this.registerCommand(new BlessRollCommand());
+        this.registerCommand(new CurseRollCommand());
         this.registerCommand(new DebugViewCommand());
         this.registerCommand(new ParseSpellCommand());
         this.registerCommand(new ReloadCommand());
@@ -178,4 +183,20 @@ public class CompendiumBot {
         return null;
     }
     //endregion
+
+    public boolean isCurseRoll() {
+        return this.curseRoll;
+    }
+
+    public void setCurseRoll(boolean curseRoll) {
+        this.curseRoll = curseRoll;
+    }
+
+    public boolean isBlessRoll() {
+        return this.blessRoll;
+    }
+
+    public void setBlessRoll(boolean blessRoll) {
+        this.blessRoll = blessRoll;
+    }
 }
