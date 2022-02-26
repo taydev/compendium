@@ -1,6 +1,6 @@
-# Compendium - Creation Suite Terms of Service
+# Compendium - Terms of Service
 
-Compendium, either through the Discord Bot or through its Creation Suite, allows Users to create their own homebrew 
+Compendium, either through the Discord Bot or through its Studio interface, allows Users to create their own homebrew 
 content for Dungeons & Dragons 5th Edition hosted through the Compendium platform, and to share their created content 
 through the Compendium Content Browser so that other Users may use their created content within their own campaigns.
 In these Terms, this content will be referred to as "User Content", and the services Compendium provides are referred to
@@ -27,7 +27,7 @@ any Content not originally created by you, or any Content which is not properly 
 uploading or contributing to the Platform. By agreeing to these Terms of Service, you accept all liability for any claims, 
 demands, suits or proceedings made or brought against Compendium by a third party alleging that your User Content infringes or 
 misappropriates such third party's intellectual property rights or violates any applicable laws. The Platform and its 
-owner is also not liable for any direct, indirect, punitive, incidental, special, consequential damages or any damages 
+owners are also not liable for any direct, indirect, punitive, incidental, special, consequential damages or any damages 
 incurred by you, however caused or under any theory of liability. This includes, but is not limited to, lost profits or 
 objects of monetary value (directly or indirectly), loss of data, or any other loss.
 
