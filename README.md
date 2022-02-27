@@ -15,10 +15,14 @@
 
 ## Modules
 
-- [Compendium (WIP)][corerepo] - The core of the project suite, providing element handling and content management functionality.
-- [Discord (WIP)][discordrepo] - Compendium's Discord bot, allowing you to use its content repository within Discord.
+- [Compendium (WIP)][corerepo] - The core of the project suite, providing element handling and
+  content management functionality.
+- [Discord (WIP)][discordrepo] - Compendium's Discord bot, allowing you to use its content
+  repository within Discord.
 - [Studio (TBA)][studiorepo]
 
 [corerepo]: https://github.com/taydev/compendium/tree/master/core
+
 [discordrepo]: https://github.com/taydev/compendium/tree/master/discord
+
 [studiorepo]: https://github.com/taydev/compendium/tree/master/studio

@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <artifactId>Compendium</artifactId>
-        <groupId>ai.chiyo.compendium</groupId>
-        <version>0.0.1</version>
-    </parent>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>Compendium-Discord</artifactId>
+  <parent>
+    <artifactId>Compendium</artifactId>
+    <groupId>ai.chiyo.compendium</groupId>
     <version>0.0.1</version>
+  </parent>
 
-    <name>Compendium-Discord</name>
+  <artifactId>Compendium-Discord</artifactId>
+  <version>0.0.1</version>
 
-    <dependencies>
-        <dependency>
-            <groupId>net.dv8tion</groupId>
-            <artifactId>JDA</artifactId>
-            <version>5.0.0-alpha.9</version>
-        </dependency>
-    </dependencies>
+  <name>Compendium-Discord</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>net.dv8tion</groupId>
+      <artifactId>JDA</artifactId>
+      <version>5.0.0-alpha.9</version>
+    </dependency>
+  </dependencies>
 </project>

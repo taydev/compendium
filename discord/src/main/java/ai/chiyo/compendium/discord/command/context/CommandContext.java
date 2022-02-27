@@ -5,31 +5,31 @@ import net.dv8tion.jda.api.entities.User;
 
 public class CommandContext {
 
-    private final User user;
-    private final Message message;
-    private final String command;
-    private final String[] args;
+  private final User user;
+  private final Message message;
+  private final String command;
+  private final String[] args;
 
-    public CommandContext(User user, Message message, String command, String[] args) {
-        this.user = user;
-        this.message = message;
-        this.command = command;
-        this.args = args;
-    }
+  public CommandContext(User user, Message message, String command, String[] args) {
+    this.user = user;
+    this.message = message;
+    this.command = command;
+    this.args = args;
+  }
 
-    public User getUser() {
-        return this.user;
-    }
+  public User getUser() {
+    return this.user;
+  }
 
-    public Message getMessage() {
-        return this.message;
-    }
+  public Message getMessage() {
+    return this.message;
+  }
 
-    public String getCommandString() {
-        return this.command;
-    }
+  public String getCommandString() {
+    return this.command;
+  }
 
-    public String[] getArguments() {
-        return this.args;
-    }
+  public String[] getArguments() {
+    return this.args;
+  }
 }
