@@ -2,8 +2,8 @@ package ai.chiyo.compendium.core.element.data.entry.types
 
 import ai.chiyo.compendium.core.element.data.entry.Entry
 
-data class TableEntry(var _name: String, var columns: List<String>, var rows: List<List<String>>) :
-    Entry(_name) {
+data class TableEntry(override var name: String, var columns: List<String>,
+                      var rows: List<List<String>>) : Entry(name) {
     fun build(): String {
         // calculate required padding per column based on longest entry in aforementioned column
         val columnPadding = HashMap<String, Int>()
