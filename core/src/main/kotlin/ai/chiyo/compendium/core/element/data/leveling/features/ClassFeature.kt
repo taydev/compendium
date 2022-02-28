@@ -14,4 +14,5 @@ data class ClassFeature(
     override var variantId: String? = null,
     override val entries: List<Entry> = mutableListOf<Entry>(),
     var classId: String = "",
+    val consumedResource: Map<String, Int> = mutableMapOf()
 ) : Feature(elementId, name, sourceId,  fromSrd, sourcePage, shortName, isVariant, variantId, entries)

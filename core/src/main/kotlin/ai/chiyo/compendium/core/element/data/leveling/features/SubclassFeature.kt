@@ -14,5 +14,6 @@ data class SubclassFeature(
     override var variantId: String? = null,
     override val entries: List<Entry> = mutableListOf<Entry>(),
     var classId: String = "",
-    var subclassId: String = ""
+    var subclassId: String = "",
+    val consumedResource: Map<String, Int> = mutableMapOf()
 ) : Feature(elementId, name, sourceId, fromSrd, sourcePage, shortName, isVariant, variantId, entries)

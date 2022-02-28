@@ -1,4 +1,4 @@
-package ai.chiyo.compendium.core.element.data.character.classdata
+package ai.chiyo.compendium.core.element.data.util
 
 enum class AbilityType(val abbreviation: String) {
     STRENGTH("STR"),

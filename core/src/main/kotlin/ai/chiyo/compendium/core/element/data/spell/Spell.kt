@@ -1,7 +1,7 @@
 package ai.chiyo.compendium.core.element.data.spell
 
 import ai.chiyo.compendium.core.element.data.entry.Entry
-import ai.chiyo.compendium.core.element.data.leveling.Scaling
+import ai.chiyo.compendium.core.element.data.util.property.ScalingProperty
 import ai.chiyo.compendium.core.element.data.mapping.*
 import ai.chiyo.compendium.core.element.data.time.Duration
 import ai.chiyo.compendium.core.element.data.time.DurationType
@@ -41,7 +41,7 @@ data class Spell(
     val entries: List<Entry> = mutableListOf<Entry>(),
     val higherLevel: List<Entry> = mutableListOf<Entry>(),
     // damage data
-    var scaling: Scaling = Scaling(),
+    var scalingProperty: ScalingProperty<String> = ScalingProperty(),
     val savingThrows: List<String> = mutableListOf<String>(),
     var abilityChecks: List<String> = mutableListOf<String>(),
     val damageInflict: List<String> = mutableListOf<String>(),
